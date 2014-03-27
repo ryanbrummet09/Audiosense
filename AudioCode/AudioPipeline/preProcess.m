@@ -1,13 +1,13 @@
-function [ cleanFile ] = preProcess(filename, reverseOrder)
+function [ locs_buzz, locs_beep, signal, cleanFile ] = preProcess(filename, reverseOrder)
 %PREPROCESS Summary of this function goes here
 %   Detailed explanation goes here
 
 signal = getSoundData(filename);
 
 if nargin == 2
-    cleanFile = buzzBeepFilter(signal,reverseOrder);
+    [locs_buzz, locs_beep, cleanFile] = buzzBeepFilter(signal,reverseOrder);
 else
-    cleanFile = buzzBeepFilter(signal);
+    [locs_buzz, locs_beep, cleanFile] = buzzBeepFilter(signal);
 end
 
 end

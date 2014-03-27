@@ -1,4 +1,4 @@
-function [ newSignal ] = buzzBeepFilter( signal, reverseRemovalOrder )
+function [ l_buzz,l_beep, newSignal ] = buzzBeepFilter( signal, reverseRemovalOrder )
 %BUZZBEEPFILTER Removes the buzz and beep from the frame
 %   BUZZBEEPFILTER Removes the buzz and beeps introduced in the audio due
 %   to the haptic and sonus feedback mechanism of AudioSense. This filter
@@ -7,15 +7,15 @@ function [ newSignal ] = buzzBeepFilter( signal, reverseRemovalOrder )
 %   it can be reversed by setting the removalOrder flag to true.
 
 if nargin == 1
-    [l1,p1,f1] = remove_buzz(signal);
-    [l2,p2,f2] = remove_beeps(f1);
+    [l_buzz,p1,f1] = remove_buzz(signal);
+    [l_beep,p2,f2] = remove_beeps(f1);
 elseif nargin == 2
     if reverseRemovalOrder == true
-        [l1,p1,f1] = remove_beeps(signal);
-        [l2,p2,f2] = remove_buzz(f1);
+        [l_buzz,p1,f1] = remove_beeps(signal);
+        [l_beep,p2,f2] = remove_buzz(f1);
     else
-        [l1,p1,f1] = remove_buzz(signal);
-        [l2,p2,f2] = remove_beeps(f1);
+        [l_buzz,p1,f1] = remove_buzz(signal);
+        [l_beep,p2,f2] = remove_beeps(f1);
     end
 else
     s = sprintf('There are either too few or too many arguments! Returning original frame');
