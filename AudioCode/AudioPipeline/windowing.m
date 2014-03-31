@@ -1,6 +1,25 @@
 function [ producedOutput, windowP, LEPercent ] = windowing( AudioFrame, LowEnergyIndicator, windowSize, lastFrameOfFile )
-%WINDOWING Summary of this function goes here
-%   Detailed explanation goes here
+%WINDOWING creates windows of the input signal
+%   This puts together a bunch of frames, specified by the user, to create
+%   a window of audio samples.
+%   
+%   Input: (AudioFrame, LowEnergyIndicator, windowSize, lastFrameOfFile)
+%   AudioFrame              :       Frame of audio signal
+%   LowEnergyIndicator      :       bit indicating whether the frame is a
+%                                   low energy frame or not
+%   windowSize              :       window size in samples
+%   lastFrameOfFiles        :       whether the frame is the last frame of
+%                                   the file
+%
+%
+%   Output: [producedOutput, windowP, LEPercent]
+%   producedOutput          :       Flag indicating whether there is a
+%                                   window produced in this particular call
+%   windowP                 :       the window of audio samples
+%   LEPercent               :       percentage of the samples that have
+%                                   been designated as 'low-energy'
+%
+%   See also, RMSFILTER, FRAMEPROCESSING 
 
 persistent initialized;
 persistent LowEnergySamples;

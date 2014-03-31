@@ -1,6 +1,6 @@
 function [ featureVector ] = runPipeline(mfccCoff, frequency)
-%RUNPIPELINE Summary of this function goes here
-%   Detailed explanation goes here
+%RUNPIPELINE An example pipeline structure
+%   
 addpath voicebox;
 addpath preprocess;
 mlock;
@@ -30,7 +30,7 @@ for P=1:length(fname)
         LowEnergyMask(Q) = frameProcessing(frames(Q,:),150);
 %         [producedOuput,audioWindow,LowEnergyPercent] = windowing(HighEnergyFrame,LowEnergyMask(Q),8000,lastFrameOfFile);
 %         if producedOuput
-%             featureVector(end+1,:) = extractFeatures(audioWindow,fname{P},LowEnergyPercent,frequency,mfccCoff);
+%             featureVector(end+1,:) = extractAudioFeatures(audioWindow,fname{P},LowEnergyPercent,frequency,mfccCoff);
 %         end
         featureVector(end+1,:) = extractFrameFeatures(frames(Q,:),fname{P},frequency,mfccCoff,LowEnergyMask(Q),buzzMask(Q),beepMask(Q));
     end

@@ -3,8 +3,20 @@ function [ l_buzz,l_beep, newSignal ] = buzzBeepFilter( signal, reverseRemovalOr
 %   BUZZBEEPFILTER Removes the buzz and beeps introduced in the audio due
 %   to the haptic and sonus feedback mechanism of AudioSense. This filter
 %   takes in the frame as input and returns a new frame with the buzzes and
-%   the beeps removed. The order of removal is Buzz then Beep by default,
+%   the beeps removed as well as the locations of the buzzes and beeps. 
+%   The order of removal is Buzz then Beep by default,
 %   it can be reversed by setting the removalOrder flag to true.
+%
+%   Input:
+%           signal                  :       Input signal
+%           reverseRemovalOrder     :       Removal Order
+%
+%   Output:
+%           l_buzz                  :       Location of buzzes
+%           l_beep                  :       Location of beeps
+%           newSignal               :       Beep and Buzz removed signal
+%
+%
 
 if nargin == 1
     [l_buzz,p1,f1] = remove_buzz(signal);

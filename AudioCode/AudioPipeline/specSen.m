@@ -1,6 +1,15 @@
 function [ specs ] = specSen( buzzBeep, toCheck )
-%SPECSEN Summary of this function goes here
-%   Detailed explanation goes here
+%SPECSEN Checks the validity of the buzz and beep removal
+%   This takes as input the buzz and beeps found manually and compares them
+%   with the ones found by the code of REMOVE_BUZZ, REMOVE_BEEP. The output
+%   is a matrix where each row is:
+%   [patient ID, condition ID, session ID, tp_beep, fn_beep, fp_beep,
+%   tp_buzz, fn_buzz, fp_buzz, recall_beep, recall_buzz, precision_beep,
+%   recall_buzz]
+%   Here    tp = true positives
+%           fn = false negatives
+%           fp = false positives
+
 specs = [];
 for P = 1:length(toCheck)
     pcs = toCheck{P,1};

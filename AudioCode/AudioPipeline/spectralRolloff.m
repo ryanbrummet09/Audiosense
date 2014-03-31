@@ -1,10 +1,10 @@
 function [ srf ] = spectralRolloff( fftAbsScaled,freqRange,ulimit )
-%SPECTRALROLLOFF Summary of this function goes here
-%   Detailed explanation goes here
-% positiveHalfFFT = fftAbsScaled(ceil(end/2):end);
-% positiveHalfFreq = freqRange(ceil(end/2):end);
-% fftAbsScaled = positiveHalfFFT;
-% freqRange = positiveHalfFreq;
+%SPECTRALROLLOFF calculates the spectral rolloff of the signal
+%   This calculates the frequency below which a certain amount of the
+%   signal resides (93% by default). The input is the output of GETFFT and
+%   ulimit, the percentage to calculate. The output is the frequency.
+%
+%   See also, GETFFT
 if nargin == 2
     ulimit = 0.93;
 end

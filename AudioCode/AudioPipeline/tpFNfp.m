@@ -1,6 +1,18 @@
 function [ tp, fn, fp ] = tpFNfp( actual, found,debugType )
 %TPFNFP returns the true positive, false negative and false positive
-%   Detailed explanation goes here
+%   For a particular file, this returns the true positive, false negative
+%   and false positive frequencies of the buzz and beep removals.
+%
+%   Input: (actual, found, debugType)
+%   acutal          :           the actual locations of buzz or beep
+%   found           :           the locations found by the algorithm
+%   debugType       :           'bz' for buzz or 'bp' for beep
+%
+%
+%   Output: [tp, fn,fp]
+%   tp              :           True Positives
+%   fn              :           False Negatives
+%   fp              :           False Positives
 
 tp = 0;
 fn = 0;

@@ -1,6 +1,9 @@
 function [ buzzBeepLocations ] = verifyBuzzBeepFilter( Frequency )
-%VERIFYBUZZBEEPFILTER Summary of this function goes here
-%   Detailed explanation goes here
+%VERIFYBUZZBEEPFILTER returns the buzz and beep locations
+%   takes as input the sampling frequency, the output is a cell array with
+%   each row as follows {[pid,cid,sid], [beep ranges in seconds], [buzz
+%   ranges in seconds]}
+
 addpath preprocess;
 [fname,pname] = uigetfile('*.audio','MultiSelect','on');
 buzzBeepLocations = {};

@@ -8,7 +8,7 @@ function [ LowEnergyIndicator ] = frameProcessing( cleanFrame, tau )
 %   tau         :       the threshold for the RMS filter
 %
 %
-%   There are two outputs:
+%   There is one output:
 %   LowEnergyIndicator  :       This indicates whether the frame failed or
 %                               passed the RMS filter.
 
