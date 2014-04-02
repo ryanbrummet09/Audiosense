@@ -7,6 +7,7 @@ mlock;
 [fname,pname] = uigetfile('*.audio','MultiSelect','on');
 h = waitbar(0,'Initializing Calculations');
 featureVector = [];
+rmsThreshold = 96.766923584390270; % emperically determined
 for P=1:length(fname)
     f = strcat(pname,fname{P});
     [locs_buzz, locs_beep, audioSignal] = preProcess(f);
@@ -27,7 +28,7 @@ for P=1:length(fname)
             featureVector(end+1,:) = fv;
             continue;
         end
-        LowEnergyMask(Q) = frameProcessing(frames(Q,:),150);
+        LowEnergyMask(Q) = frameProcessing(frames(Q,:),rmsThreshold);
 %         [producedOuput,audioWindow,LowEnergyPercent] = windowing(HighEnergyFrame,LowEnergyMask(Q),8000,lastFrameOfFile);
 %         if producedOuput
 %             featureVector(end+1,:) = extractAudioFeatures(audioWindow,fname{P},LowEnergyPercent,frequency,mfccCoff);
