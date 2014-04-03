@@ -23,8 +23,8 @@ function [ rmsValues,totalRMS,pctl,pname,fname ] = rmsThresholdCalculation( fram
 %                                               over all files
 %           path                    :           directory path
 %           filename                :           Cell array with filenames
-addpath ../voicebox;
-addpath ../;
+addpath ../../voicebox;
+addpath ../../;
 totalRMS = [];
 rmsValues = {};
 [fname,pname] = uigetfile('*.audio','MultiSelect','on');
