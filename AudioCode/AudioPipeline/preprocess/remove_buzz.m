@@ -19,6 +19,7 @@ end
 
 if (isempty(buzzTemplate))
     buzzTemplate = raw_sound('buzz.raw');
+    length(buzzTemplate);
     buzzTemplate = scale_signal(buzzTemplate, -1, 1);
     buzzTemplate = filter(buzzBandPass, buzzTemplate);
     
