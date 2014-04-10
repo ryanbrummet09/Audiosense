@@ -1,3 +1,5 @@
+to use run the audioSurveyProc.m function
+
 dataExtractCode contains code that is used to extract code from the raw data
 file.  It also contains code to remove 50 values, samples that are not a 
 certain percentage in length of the average duration of a survey for each
