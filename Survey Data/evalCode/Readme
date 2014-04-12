@@ -1,7 +1,0 @@
-getPValueUsingModTTest.m - gives a p value (null hypothesis two input groups 
-	were not sampled from the same population) using the t test for each
-	attribute (9 in total)
-
-getPValueUsingTTestAndSingleScore.m - gives a p value (null hypothesis two
-	input groups were not sampled from the same population) using the t
-	test for one combined score
