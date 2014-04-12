@@ -1,4 +1,0 @@
-normalizeAcrossUsers.m - normalizes data across users
-
-normalizeDataGlobally.m - normalizes data across all samples indepedent of 
-	users
