@@ -30,7 +30,7 @@ function [ inputData ] = normalizeAcrossUsers( inputData, userSet )
                 tempIndex = tempIndex + 1;
             end
         end
-        for m = 1 : 9
+        for m = 1 : size(inputData(:,14:size(inputData,2)),2)
             tempIndex = 1;
             temp2(1) = NaN;
             for j = 1 : size(temp,1)
@@ -55,7 +55,7 @@ function [ inputData ] = normalizeAcrossUsers( inputData, userSet )
     %here we normalize the data
     for k = 1 : size(inputData,1)
         index = find(userNorms(:,1) == inputData(k,1));
-        for j = 1 : 9
+        for j = 1 : size(inputData(:,14:size(inputData,2)),2)
             inputData(k,13 + j) = (inputData(k,13 + j) - userNorms(index,2 * j)) / userNorms(index,(2 * j) + 1);
         end
     end
@@ -63,12 +63,12 @@ function [ inputData ] = normalizeAcrossUsers( inputData, userSet )
     %here we rescale the data between 0 and 100
     %minimum and maximums are found per attribute and not globally for all
     %attributes
-    for k = 1 : 9
+    for k = 1 : size(inputData(:,14:size(inputData,2)),2)
         minimum(k) = min(inputData(:,13 + k));
         maximum(k) = max(inputData(:,13 + k));
     end
     for k = 1 : size(inputData,1)
-        for j = 1 : 9
+        for j = 1 : size(inputData(:,14:size(inputData,2)),2)
             inputData(k,13 + j) = 100 * (inputData(k,13 + j) - minimum(j)) / (maximum(j) - minimum(j));
         end
     end

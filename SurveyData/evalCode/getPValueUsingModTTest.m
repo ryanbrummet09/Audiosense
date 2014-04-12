@@ -17,7 +17,7 @@ function [ pValues ] = getPValueUsingModTTest( groupOne, groupTwo )
     avgSTDContexts = zeros([2,19]);
     avgSTDContexts(1,1) = 1;
     avgSTDContexts(2,1) = 2;
-    for k = 1 : 9
+    for k = 1 : size(groupOne(:,14:size(groupOne,2)),2)
         index = 1;
         temp(1) = NaN;
         for i = 1 : size(groupOne,1)
@@ -32,7 +32,7 @@ function [ pValues ] = getPValueUsingModTTest( groupOne, groupTwo )
     end
     
     %group two average and standard deviation calc
-    for k = 1 : 9
+    for k = 1 : size(groupTwo(:,14:size(groupTwo,2)),2)
         index = 1;
         temp(1) = NaN;
         for i = 1 : size(groupTwo,1)
@@ -54,7 +54,7 @@ function [ pValues ] = getPValueUsingModTTest( groupOne, groupTwo )
     %possiblity that the sizes of group one and group two are different.
     n1 = size(groupOne,1);
     n2 = size(groupTwo,1);
-    for k = 1 : 9
+    for k = 1 : size(groupOne(:,14:size(groupOne,2)),2)
         stDevOne = avgSTDContexts(1,((2 * k) + 1));
         stDevTwo = avgSTDContexts(2,((2 * k) + 1));
         avgOne = avgSTDContexts(1,(k * 2));
@@ -69,7 +69,7 @@ function [ pValues ] = getPValueUsingModTTest( groupOne, groupTwo )
     
     %calculate pValues, stored in pValues with the same ordering as the 
     %first row of tValues (by column)
-    for k = 1 : 9
+    for k = 1 : size(groupOne(:,14:size(groupOne,2)),2)
         pValues(k) = tcdf(tValues(1,k),tValues(2,k)); 
     end
 end

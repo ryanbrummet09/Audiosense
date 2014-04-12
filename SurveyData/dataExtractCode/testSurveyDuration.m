@@ -61,7 +61,7 @@ function [ returnedData, userSampleCount, userIndexSet ] = ...
     for k = 1 : size(inputData,1)
         index = find(userSampleCount(:,1) == inputData(k,1));
         userSampleCount(index,2) = userSampleCount(index,2) + 1;
-        userDurations(index,userSampleCount(index,2)) = inputData(k,23);
+        userDurations(index,userSampleCount(index,2)) = inputData(k,size(inputData,2));
         userIndexSet(index,userSampleCount(index,2)) = k;
     end
     userDurationAverage = zeros(size(userSet,2),2);
@@ -77,11 +77,11 @@ function [ returnedData, userSampleCount, userIndexSet ] = ...
         userIndex = find(userDurationAverage(:,1) == inputData(k,1));
         minimum = userDurationAverage(userIndex,2) * (minSurveyPercent / 100);
         maximum = 2 * userDurationAverage(userIndex,2) - minimum;
-        if (inputData(k,23) >= minimum) & (inputData(k,23) <= maximum)
+        if (inputData(k,size(inputData,2)) >= minimum) & (inputData(k,size(inputData,2)) <= maximum)
             index2 = find(userSampleCount(:,1) == inputData(k,1));
             userSampleCount(index2,2) = userSampleCount(index2,2) + 1;
             userIndexSet(index2,userSampleCount(index2,2)) = index;
-            returnedData(index,:) = inputData(k,1:22);
+            returnedData(index,:) = inputData(k,1:size(inputData,2) - 1);
             index = index + 1;
         end
     end

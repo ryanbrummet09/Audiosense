@@ -83,6 +83,5 @@ function [ trainingSet, testingSet ] = yesUsrReSample(trainingIndex,...
             end
         end
     end
-    k
 end
 

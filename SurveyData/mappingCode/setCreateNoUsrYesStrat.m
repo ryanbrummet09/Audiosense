@@ -54,7 +54,7 @@ function [ trainingSet, testingSet, trainingIndex, testingIndex, currentSampleCo
             end
         end
     end
-    for k = 5 + (floor(size(inputData,1) / 5) - 1) * 5 : size(inputData,1)
+    for k = 6 + (floor(size(inputData,1) / 5) - 1) * 5 : size(inputData,1)
         testingSet(testingIndex,:) = inputData(k,:);
         testingIndex = testingIndex + 1;
         temp = find(currentSampleCountTesting(:,1) == inputData(k,1));

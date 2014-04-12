@@ -17,15 +17,11 @@ function [ returnData ] = combineScoresAndReScale( inputData, mapType )
         clearvars temp
         temp(1) = NaN;
         index = 1;
-        for j = 1 : 9
+        for j = 1 : size(inputData(:,14:size(inputData,2)),2)
             if inputData(k,13 + j) >= 0
                 temp(index) = inputData(k,13 + j); 
                 index = index + 1;
             end
-        end
-        if isnan(temp(1))
-            k
-            error('penis'); 
         end
         if mapType
             returnData(k,14) = median(temp);

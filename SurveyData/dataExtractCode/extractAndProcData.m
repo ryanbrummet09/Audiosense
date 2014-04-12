@@ -44,8 +44,6 @@ function [ returnedData, userSet ] = extractAndProcData( targetFileName, ...
 
 %  userSet (output vector): gives a vector of all user id's
 
-
-
     fid = fopen(targetFileName);
 
     %remove column names

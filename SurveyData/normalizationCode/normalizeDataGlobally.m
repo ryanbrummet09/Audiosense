@@ -11,7 +11,7 @@ function [ returnData ] = normalizeDataGlobally( inputData )
     %we get for each attribute are different becuase of NaN values, but we
     %can't use find to eliminate "overflow" since the values include 0.
     norms = zeros(9,2);
-    for k = 1 : 9
+    for k = 1 : size(inputData(:,14:size(inputData,2)),2)
         index = 1;
         for j = 1 : size(inputData,1)
              if input(j,13 + j) >= 0
@@ -27,7 +27,7 @@ function [ returnData ] = normalizeDataGlobally( inputData )
     %normalize data
     returnData = inputData;
     for k = 1 : size(inputData,1)
-        for j = 1 : 9
+        for j = 1 : size(inputData(:,14:size(inputData,2)),2)
             returnData(k,13 + j) = (inputData(k,13 + j) - norms(j,1)) / norms(j,2); 
         end
     end
@@ -35,13 +35,13 @@ function [ returnData ] = normalizeDataGlobally( inputData )
     %rescale data to be on the interval [0,100]
     %minimum and maximums are found per attribute and not globally for all
     %attributes
-    for k = 1 : 9
+    for k = 1 : size(inputData(:,14:size(inputData,2)),2)
         minimum(k) = min(returnData(:,13 + k));
         maximum(k) = max(returnData(:,13 + k));
     end
     
     for k = 1 : size(returnData,1)
-        for j = 1 : 9
+        for j = 1 : size(inputData(:,14:size(inputData,2)),2)
             returnData(k,13 + j) = 100 * (returnData(k,13 + j) - minimum(j)) / (maximum(j) - minimum(j));
         end
     end

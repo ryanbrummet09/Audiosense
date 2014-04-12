@@ -3,7 +3,7 @@
 
 function [ trainingSet, testingSet, trainingIndex, testingIndex, currentSampleCountTraining, ...
     currentSampleCountTesting, currentSampleTrainingIndexes, ...
-    currentSampleTestingIndexes ] = setCreateYesUsrYesStrat(trainingIndex,... 
+    currentSampleTestingIndexes ] = setCreateYesUsrNoStrat(trainingIndex,... 
     testingIndex, user, userIndexSet, userSampleCount, currentSampleCountTraining, currentSampleCountTesting, ...
     currentSampleTrainingIndexes, currentSampleTestingIndexes, inputData )
 
@@ -45,34 +45,27 @@ function [ trainingSet, testingSet, trainingIndex, testingIndex, currentSampleCo
 %testingSet (output 3dArray): subset of the overall patient data matrix that
 %       will be used as a testing set for the attribute mappings
 
-    maximum = max(userSampleCount(:,2));
-    trainingSet = zeros(maximum,22);
-    testingSet = zeros(maximum,22);
+
     temp1 = find(userIndexSet(user,:));
-    for j = 0 : floor(size(temp1,2) / 5) - 1
-        temp2 = randperm(5,1);
-        for g = 1 : 5
-            if g ~= temp2
-                trainingSet(trainingIndex(user,1),:) = inputData(userIndexSet(user,temp1(1,(j * 5) + g)),:);
-                trainingIndex(user,1) = trainingIndex(user,1) + 1;
-                temp = find(currentSampleCountTraining(:,1) == inputData(userIndexSet(user,temp1(1,(j * 5) + g)),1));
-                currentSampleCountTraining(temp,2) = currentSampleCountTraining(temp,2) + 1;
-                currentSampleTrainingIndexes(temp,userIndexSet(user,temp1(1,(j * 5) + g))) = userIndexSet(user,temp1(1,(j * 5) + g));
-            else 
-                testingSet(testingIndex(user,1),:) = inputData(userIndexSet(user,temp1(1,(j * 5) + g)),:);
-                testingIndex(user,1) = testingIndex(user,1) + 1;
-                temp = find(currentSampleCountTesting(:,1) == inputData(userIndexSet(user,temp1(1,(j * 5) + g)),1));
-                currentSampleCountTesting(temp,2) = currentSampleCountTesting(temp,2) + 1;
-                currentSampleTestingIndexes(temp,userIndexSet(user,temp1(1,(j * 5) + g))) = userIndexSet(user,temp1(1,(j * 5) + g));
-            end
+    trainingSetSize = floor(size(temp1,2) * .8);
+    trainingSetIndexes = randperm(size(temp1,2),trainingSetSize);
+    maximum = max(userSampleCount(:,2));
+    trainingSet = zeros(maximum,size(inputData,2));
+    testingSet = zeros(maximum,size(inputData,2));
+    for j = 1 : size(temp1,2)
+        if ismember(j,trainingSetIndexes)
+            trainingSet(trainingIndex(user,1),:) = inputData(userIndexSet(user,temp1(1,j)),:);
+            trainingIndex(user,1) = trainingIndex(user,1) + 1;
+            temp = find(currentSampleCountTraining(:,1) == inputData(userIndexSet(user,temp1(1,j)),1));
+            currentSampleCountTraining(temp,2) = currentSampleCountTraining(temp,2) + 1;
+            currentSampleTrainingIndexes(temp,userIndexSet(user,temp1(1,j))) = userIndexSet(user,temp1(1,j));
+        else
+            testingSet(testingIndex(user,1),:) = inputData(userIndexSet(user,temp1(1,j)),:);
+            testingIndex(user,1) = testingIndex(user,1) + 1;
+            temp = find(currentSampleCountTesting(:,1) == inputData(userIndexSet(user,temp1(1,j)),1));
+            currentSampleCountTesting(temp,2) = currentSampleCountTesting(temp,2) + 1;
+            currentSampleTestingIndexes(temp,userIndexSet(user,temp1(1,j))) = userIndexSet(user,temp1(1,j));
         end
-    end
-    for j = 5 + (floor(size(temp1,2) / 5) - 1) * 5 : size(temp1,2)
-        testingSet(testingIndex(user,1),:) = inputData(userIndexSet(user,temp1(1,j),:));
-        testingIndex(user,1) = testingIndex(user,1) + 1;
-        temp = find(currentSampleCountTesting(:,1) == inputData(userIndexSet(user,temp1(1,j),1)));
-        currentSampleCountTesting(temp,2) = currentSampleCountTesting(temp,2) + 1;
-        currentSampleTestingIndexes(temp,userIndexSet(user,temp1(1,j))) = userIndexSet(user,temp1(1,j));
     end
 end
 

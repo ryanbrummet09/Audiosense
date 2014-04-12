@@ -29,7 +29,7 @@ function [ mapError ] = noUsrErrorCalc( trainingSet, testingSet, ...
 
     adjTrainingSet = trainingSet;
     for k = 1 : size(trainingSet,1)
-        for j = 1 : 9
+        for j = 1 : size(trainingSet(:,14:size(trainingSet,2)),2)
             %we censor our results to be on the interval [0,100]
             convertedVal = 0;
             for g = deg: -1: 0
@@ -47,7 +47,7 @@ function [ mapError ] = noUsrErrorCalc( trainingSet, testingSet, ...
     
     adjTestingSet = testingSet;
     for k = 1 : size(testingSet,1)
-        for j = 1 : 9
+        for j = 1 : size(testingSet(:,14:size(testingSet,2)),2)
             %we must censor our results to be on the interval [0,100]
             convertedVal = 0;
             for g = deg: -1: 0
@@ -63,7 +63,7 @@ function [ mapError ] = noUsrErrorCalc( trainingSet, testingSet, ...
         end
     end
 
-    for k = 1 : 9
+    for k = 1 : size(trainingSet(:,14:size(trainingSet,2)),2)
         clearvars temp1Error temp2Error;
         testingErrorIndex = 1;
         trainingErrorIndex = 1;

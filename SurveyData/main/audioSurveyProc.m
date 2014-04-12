@@ -1,14 +1,20 @@
 %Author Ryan Brummet
 %University of Iowa
 
-function [ extractedData, combinedData, mappingError, mappingCoefficients ] = ...
-    audioSurveyProc( targetFileName, removeFiftyVals, ...
+function [ extractedData, mappedData, combinedData, mappingError, mappingCoefficients, attrMapTarget ] = ...
+    audioSurveyProc( targetFileName, targetAttrs, removeFiftyVals, ...
     minSurveyPercent, omitNotListening, omitListening, omitNotUserInit, ...
     omitUserInit, normalizeMethod, mapScore, mapPerUser, stratifySampling, ...
     reSample, attrMapTarget, polyFitDegree, medianTrueMeanFalse)
 
 %targetFileName (input string): raw input data file name. include the
 %       extension.
+
+%targetAttrs (input vector): a 1x9 vector of 1s and 0s.  Each column stands
+%       for, in increasing index size, sp, le, ld, ld2, lcl, ap, qol, im,
+%       st.  A 1 indicates to extract the attribute, a 0 indicates not to
+%       extract the attribute.  true or false may be used in place of the
+%       1s and 0s.
 
 %removeFiftyVals (input bool): whether or not to remove 50 vals
 
@@ -64,7 +70,11 @@ function [ extractedData, combinedData, mappingError, mappingCoefficients ] = ..
 %extractedData (output matrix): gives the data that was extracted.  May or
 %       may not be normalized depending on whether normalization was performed.
 %       This matrix is in the form patientID, listening, userInit, ac, lc, tf, vc,
-%       tl, nl, rs, cp, nz, condition, sp, le, ld, ld2, lcl, ap, qol, im, st
+%       tl, nl, rs, cp, nz, condition, sp, le, ld, ld2, lcl, ap, qol, im,
+%       st.  If values attributes were removed the column identities are
+%       subject to change.  Removing attributes has the effect of deleting
+%       columns so the indexes will be effected by which columns are
+%       deleted.
 
 %combinedData (output matrix): gives the data that was extracted with the
 %       attributes combined to a single attribute.  First all attribute are
@@ -100,6 +110,9 @@ function [ extractedData, combinedData, mappingError, mappingCoefficients ] = ..
         removeFiftyVals, omitNotListening, omitListening, omitNotUserInit, ...
         omitUserInit);
     
+    %remove attributes that are not needed
+    [ extractedData, attrMapTarget ] = pickAttrs( extractedData, targetAttrs, attrMapTarget);
+    
     %remove samples that don't make duration requirements
     [extractedData, userSampleCount, userIndexSet] = testSurveyDuration( ...
         extractedData, minSurveyPercent, userSet);
@@ -120,8 +133,11 @@ function [ extractedData, combinedData, mappingError, mappingCoefficients ] = ..
     end
     
     %map attributes if mapScore is true
+    %combinedData has all attributes combined to one score while mappedData
+    %has all the attributes mapped onto the target Attribute withoug
+    %combining attributes.
     if mapScore
-        [combinedData, mappingError, mappingCoefficients] = ...
+        [combinedData, mappedData, mappingError, mappingCoefficients] = ...
             mapAttributes(mapPerUser, stratifySampling, reSample, ...
             attrMapTarget, polyFitDegree, extractedData, ...
             userSampleCount, userIndexSet, medianTrueMeanFalse);

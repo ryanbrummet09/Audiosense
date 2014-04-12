@@ -1,7 +1,7 @@
 %Author Ryan Brummet
 %University of Iowa
 
-function [mappedData, mapError, mapCoef] = mapAttributes(mapPerUser, ...
+function [combinedData, mappedDataTemp, mapError, mapCoef] = mapAttributes(mapPerUser, ...
     stratifySample, reSample, target, deg, inputData, ...
     userSampleCount, userIndexSet, medianMap)
 %This function maps all the attributes of survey samples set onto a
@@ -112,7 +112,7 @@ function [mappedData, mapError, mapCoef] = mapAttributes(mapPerUser, ...
         clearvars testingIndex trainingIndex currentSampleCountTesting ...
             currentSampleCountTraining currentSampleTestingIndexes currentSampleTrainingIndexes;
         for k = 1 : size(userIndexSet,1)
-            for m = 1: 9
+            for m = 1 : size(inputData(:,14:size(inputData,2)),2)
                 if m ~= target
                     index = 1;
                     temp(1,1) = NaN;
@@ -144,7 +144,7 @@ function [mappedData, mapError, mapCoef] = mapAttributes(mapPerUser, ...
             mappedDataTemp = inputData;
             temp = find(userIndexSet(k,:));
             for j = 1 : size(find(userIndexSet(k,:)),2)
-                for m = 1 : 9
+                for m = 1 : size(inputData(:,14:size(inputData,2)),2)
                     convertedVal = 0;
                     for g = deg: -1: 0
                         convertedVal = convertedVal + (mappedDataTemp(userIndexSet(k,temp(j)),13 + m)^g)*mapCoef(m,g + 1);
@@ -193,7 +193,7 @@ function [mappedData, mapError, mapCoef] = mapAttributes(mapPerUser, ...
         
         %find mapping function coefficients
         mapCoef = zeros(9,deg + 1);
-        for k = 1: 9
+        for k = 1: size(inputData(:,14:size(inputData,2)),2)
             if k ~= target
                 index = 1;
                 for j = 1 : size(trainingSet,1)
@@ -219,7 +219,7 @@ function [mappedData, mapError, mapCoef] = mapAttributes(mapPerUser, ...
         %convert all attributes
         mappedDataTemp = inputData;
         for k = 1 : size(inputData,1)
-            for j = 1 : 9
+            for j = 1 : size(inputData(:,14:size(inputData,2)),2)
                 %we must censor our results to be on the interval [0,100]
                 convertedVal = 0;
                 for g = deg: -1: 0
@@ -237,6 +237,6 @@ function [mappedData, mapError, mapCoef] = mapAttributes(mapPerUser, ...
     end
     
     %combine scores and rescale scores to [0,100]
-    [mappedData] = combineScoresAndReScale(mappedDataTemp, medianMap);
+    [combinedData] = combineScoresAndReScale(mappedDataTemp, medianMap);
 end
 

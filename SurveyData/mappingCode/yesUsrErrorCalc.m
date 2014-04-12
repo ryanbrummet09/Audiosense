@@ -32,7 +32,7 @@ function [ mapError ] = yesUsrErrorCalc(user, trainingSet, testingSet, ...
 
     adjTrainingSet = trainingSet;
     for m = 1 : size(find(trainingSet(:,1,user)),1)
-        for j = 1 : 9
+        for j = 1 : size(trainingSet(:,14:size(trainingSet,2)),2)
             %we censor our results to be on the interval [0,100]
             convertedVal = 0;
             for g = deg: -1: 0
@@ -50,7 +50,7 @@ function [ mapError ] = yesUsrErrorCalc(user, trainingSet, testingSet, ...
 
     adjTestingSet = testingSet;
     for m = 1 : size(find(testingSet(:,1,user)),1)
-        for j = 1 : 9
+        for j = 1 : size(testingSet(:,14:size(testingSet,2)),2)
             %we censor our results to be on the interval [0,100]
             convertedVal = 0;
             for g = deg: -1: 0
@@ -66,7 +66,7 @@ function [ mapError ] = yesUsrErrorCalc(user, trainingSet, testingSet, ...
         end
     end
     
-    for m = 1 : 9
+    for m = 1 : size(trainingSet(:,14:size(trainingSet,2)),2)
         clearvars temp1Error temp2Error;
         testingErrorIndex = 1;
         trainingErrorIndex = 1;
