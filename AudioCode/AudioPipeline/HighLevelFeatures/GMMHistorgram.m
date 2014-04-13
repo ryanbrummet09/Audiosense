@@ -42,7 +42,7 @@ for P = 1:r
     end
     toUpdate = find(mPDF == max(mPDF));
     if length(toUpdate)>1
-        toUpdate = datasample(toUpdate,1);
+        toUpdate = 3 + datasample(toUpdate,1);
     end
     GMMHist(GMMHist(:,1)==inputSet(P,1) & ...
         GMMHist(:,2)==inputSet(P,2) & ...
