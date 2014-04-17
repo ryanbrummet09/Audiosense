@@ -1,15 +1,29 @@
-function [ featureVector ] = runPipeline(mfccCoff, frequency)
+function [ featureVector ] = runPipeline(mfccCoff, frequency, fileList)
 %RUNPIPELINE An example pipeline structure
 %   
 addpath voicebox;
 addpath preprocess;
 mlock;
-[fname,pname] = uigetfile('*.audio','MultiSelect','on');
+if nargin < 3
+    fileList = false;
+end
+
+if ~fileList
+    [fname,pname] = uigetfile('*.audio','MultiSelect','on');
+else
+    [fileWithList, fLPname] = uigetfile('*.txt');
+    % get all the filenames with paths
+    fname = importdata(strcat(fLPname,fileWithList));
+end
 h = waitbar(0,'Initializing Calculations');
 featureVector = [];
 rmsThreshold = 96.766923584390270; % emperically determined
 for P=1:length(fname)
-    f = strcat(pname,fname{P});
+    if ~fileList
+        f = strcat(pname,fname{P});
+    else
+        f = fname{P};
+    end
     [locs_buzz, locs_beep, audioSignal] = preProcess(f);
     [buzzMask, beepMask, frames] = framing(audioSignal,frequency,0.02, locs_buzz, locs_beep);
     LowEnergyMask = false(1,length(frames));
