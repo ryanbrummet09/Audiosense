@@ -29,7 +29,7 @@ for P=1:length(fname)
     LowEnergyMask = false(1,length(frames));
     %waitbar(0,h,'Initializing calculations');
     for Q=1:length(frames)
-        s = sprintf('Operating on frame # %d of %d \n for \n %s(file %d of %d)',Q,length(frames),fname{P},P,length(fname));
+        s = sprintf('Operating on frame # %d of %d \n for \n %s \n(file %d of %d)',Q,length(frames),fname{P},P,length(fname));
         waitbar(Q/length(frames),h,s);
         lastFrameOfFile = (frames(Q,:)==frames(end,:));
         if buzzMask(Q) | beepMask(Q)
