@@ -1,4 +1,4 @@
-function [ GMMHist ] = GMMHistorgram( inputSet, GMMObj, startIndex, endIndex)
+function [ GMMHist ] = GMMHistorgram( inputSet, GMMObj, startIndex, endIndex, normalizeHist)
 %GMMHISTORGRAM Creates a GMM histogram of the input set of features
 %   
 %   This creates a histogram of the input set of features.
@@ -11,6 +11,10 @@ function [ GMMHist ] = GMMHistorgram( inputSet, GMMObj, startIndex, endIndex)
 %           endIndex        :       The starting and ending indices
 %                                   (in the inputSet) of the
 %                                   feature we have built the GMM of
+%           normalizeHist   :       Flag to indicate whether to represent
+%                                   the histogram as a pdf. This is an
+%                                   optional flag, it is assumed to be true
+%                                   unless explicitly declared false
 % 
 %   Output:
 %           GMMHist         :       The histogram, each row represents one
@@ -18,6 +22,9 @@ function [ GMMHist ] = GMMHistorgram( inputSet, GMMObj, startIndex, endIndex)
 %                                   following form
 %   [patientID, conditionID, session ID, histogram for each model]
 
+if nargin == 4
+    normalizeHist = true;
+end
 [r c] = size(GMMObj.mu);
 numberOfModels = r;
 modelsMu = GMMObj.mu;
@@ -42,8 +49,9 @@ for P = 1:r
     end
     toUpdate = find(mPDF == max(mPDF));
     if length(toUpdate)>1
-        toUpdate = 3 + datasample(toUpdate,1);
+        toUpdate = datasample(toUpdate,1);
     end
+    toUpdate = toUpdate + 3;
     GMMHist(GMMHist(:,1)==inputSet(P,1) & ...
         GMMHist(:,2)==inputSet(P,2) & ...
         GMMHist(:,3)==inputSet(P,3),toUpdate) = GMMHist(GMMHist(:,1)==inputSet(P,1) & ...
@@ -51,6 +59,12 @@ for P = 1:r
                                                 GMMHist(:,3)==inputSet(P,3),toUpdate) +1;
     
 end
-
+if normalizeHist
+    [r c] = size(GMMHist);
+    for P = 1:r
+        s = sum(GMMHist(P,4:end));
+        GMMHist(P,4:end) = GMMHist(P,4:end)/s;
+    end
+end
 end
 
