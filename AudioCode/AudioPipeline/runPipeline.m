@@ -10,6 +10,7 @@ end
 
 if ~fileList
     [fname,pname] = uigetfile('*.audio','MultiSelect','on');
+    fname = strcat(pname,fname);
 else
     [fileWithList, fLPname] = uigetfile('*.txt');
     % get all the filenames with paths
@@ -18,12 +19,8 @@ end
 h = waitbar(0,'Initializing Calculations');
 featureVector = [];
 rmsThreshold = 96.766923584390270; % emperically determined
-for P=1:length(fname)
-    if ~fileList
-        f = strcat(pname,fname{P});
-    else
-        f = fname{P};
-    end
+for P=1:length(fname)        
+    f = fname{P};
     [locs_buzz, locs_beep, audioSignal] = preProcess(f);
     [buzzMask, beepMask, frames] = framing(audioSignal,frequency,0.02, locs_buzz, locs_beep);
     LowEnergyMask = false(1,length(frames));
