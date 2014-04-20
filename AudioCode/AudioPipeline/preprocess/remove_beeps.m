@@ -48,8 +48,20 @@ guard = ceil(.1 * 16000);
 
 keep = true(size(signal));
 for x = 1:length(locs)
-    keep(locs(x) - guard :locs(x) + sz + guard) = false;
+    ll = locs(x)-guard;
+    if ll <= 0
+        ll = 1;
+    end
+    ul = locs(x) + sz + guard;
+    if ul > length(orig)
+        ul = length(orig);
+    end
+    keep(ll:ul) = false;
 end
+
+% for x = 1:length(locs)
+%     keep(locs(x) - guard :locs(x) + sz + guard) = false;
+% end
 
 new_signal = orig(keep);
 
