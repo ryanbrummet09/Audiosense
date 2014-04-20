@@ -16,6 +16,7 @@ else
     % get all the filenames with paths
     fname = importdata(strcat(fLPname,fileWithList));
 end
+[fname,removedFiles] = sanityCheck(fname);
 h = waitbar(0,'Initializing Calculations');
 featureVector = [];
 rmsThreshold = 96.766923584390270; % emperically determined
