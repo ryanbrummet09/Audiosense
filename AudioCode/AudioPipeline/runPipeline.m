@@ -43,19 +43,22 @@ end
 %% Sanity check
 % It has been noticed that, sometimes, we get files that are of zero
 % length. We run our input through a "sanity check" in order to prune those
-% files out
-[fname,removedFiles] = sanityCheck(fname);
+% files out. This also returns the number of rows we would need for the
+% audio files. This helps in optimizing the code.
+
+[fname,removedFiles, numberOfRows] = sanityCheck(fname,frequency,0.02);
 
 %% Feature computation
 % The gui waitbar indicates how much progress has been achieved
 h = waitbar(0,'Initializing Calculations');
-featureVector = [];
+  featureVector = zeros(numberOfRows,23);
 
 % The rmsThreshold is obtained from emperical studies, these can be checked
 % out in the TestingAndValidation folder
 rmsThreshold = 96.766923584390270; 
-
+K = 1;
 % For each file we calculate the features
+
 for P=1:length(fname)        
     f = fname{P};
 %     obtain the locations of the buzzes and beeps
@@ -69,7 +72,9 @@ for P=1:length(fname)
     
 %     for each frame we calculate the features
     for Q=1:length(frames)
-        s = sprintf('Operating on frame # %d of %d \n for \n %s \n(file %d of %d)',Q,length(frames),fname{P},P,length(fname));
+        tt = strsplit(fname{P},'/');
+        tt = tt{end};
+        s = sprintf('frame # %d of %d \n %s \n(file %d of %d)',Q,length(frames),tt,P,length(fname));
         waitbar(Q/length(frames),h,s);
         lastFrameOfFile = (frames(Q,:)==frames(end,:));
         
@@ -83,7 +88,9 @@ for P=1:length(fname)
             fv(1,end+1) = buzzMask(Q);  fv(1,end+1) = beepMask(Q);
             
 %             the feature vector is filled with blanks in this case
-            featureVector(end+1,:) = fv;
+%             fv = updateFeatureVector(fv,false);
+            featureVector(K,:) = fv;
+            K = K+1;
             continue;
         end
         
@@ -91,10 +98,14 @@ for P=1:length(fname)
 %     activity).
         LowEnergyMask(Q) = frameProcessing(frames(Q,:),rmsThreshold);
 %         The extracted features are stored in a feature matrix
-        featureVector(end+1,:) = extractFrameFeatures(frames(Q,:),fname{P},frequency,mfccCoff,LowEnergyMask(Q),buzzMask(Q),beepMask(Q));
+        featureVector(K,:) = extractFrameFeatures(frames(Q,:),fname{P},frequency,mfccCoff,LowEnergyMask(Q),buzzMask(Q),beepMask(Q));
+%         fv = extractFrameFeatures(frames(Q,:),fname{P},frequency,mfccCoff,LowEnergyMask(Q),buzzMask(Q),beepMask(Q));
+%         fv = updateFeatureVector(fv,false);
+        K = K+1;
     end
 end
 % unlock the memory of the persistent variables
 munlock;
+% featureVector = updateFeatureVector([],true);
 end
 
