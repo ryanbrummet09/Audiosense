@@ -1,0 +1,10 @@
+extractAndProcData.m - extract the data from the raw data file, finds the 
+	length of time a user spent taking each survey, and removes fifites
+	values based on the bool removeFiftyVals
+
+removeNonQualUsers.m - remove users that have less that 20 samples.  This 
+	function is run after testSurveyDuration is run
+
+testSurveyDuration.m - removes samples that are not a certain percentage
+	in length of the average amount of time the user of that sample
+	spends taking a survey
