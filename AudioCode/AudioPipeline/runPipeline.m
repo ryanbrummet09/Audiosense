@@ -61,19 +61,33 @@ K = 1;
 
 for P=1:length(fname)        
     f = fname{P};
+    tt = strsplit(fname{P},'/');
+    tt = tt{end};
 %     obtain the locations of the buzzes and beeps
-    [locs_buzz, locs_beep, audioSignal] = preProcess(f);
+    try
+        [locs_buzz, locs_beep, audioSignal] = preProcess(f);
+    catch err
+        errmsg = sprintf('Preprocessing error for file %s, skipping file',tt);
+        disp(errmsg);
+        err
+        continue;
+    end
 %     frame the input audio and also get the buzz and beep masks. These
 %     masks are binary arrays where entries are switched on if there are
 %     any buzzes or beeps. The audio is also broken up into frames of 20ms
 %     each. The windowing used is rectangular.
-    [buzzMask, beepMask, frames] = framing(audioSignal,frequency,0.02, locs_buzz, locs_beep);
+    try
+        [buzzMask, beepMask, frames] = framing(audioSignal,frequency,0.02, locs_buzz, locs_beep);
+    catch err
+        errmsg = sprintf('Framing error for file %s, skipping file',tt);
+        disp(errmsg);
+        err
+        continue;
+    end
     LowEnergyMask = false(1,length(frames));
     
 %     for each frame we calculate the features
     for Q=1:length(frames)
-        tt = strsplit(fname{P},'/');
-        tt = tt{end};
         s = sprintf('frame # %d of %d \n %s \n(file %d of %d)',Q,length(frames),tt,P,length(fname));
         waitbar(Q/length(frames),h,s);
         lastFrameOfFile = (frames(Q,:)==frames(end,:));
@@ -96,12 +110,19 @@ for P=1:length(fname)
         
 %     we determine the low energy frames (no useful information/no voice
 %     activity).
-        LowEnergyMask(Q) = frameProcessing(frames(Q,:),rmsThreshold);
-%         The extracted features are stored in a feature matrix
-        featureVector(K,:) = extractFrameFeatures(frames(Q,:),fname{P},frequency,mfccCoff,LowEnergyMask(Q),buzzMask(Q),beepMask(Q));
-%         fv = extractFrameFeatures(frames(Q,:),fname{P},frequency,mfccCoff,LowEnergyMask(Q),buzzMask(Q),beepMask(Q));
-%         fv = updateFeatureVector(fv,false);
-        K = K+1;
+        try
+            LowEnergyMask(Q) = frameProcessing(frames(Q,:),rmsThreshold);
+%           The extracted features are stored in a feature matrix
+            featureVector(K,:) = extractFrameFeatures(frames(Q,:),fname{P},frequency,mfccCoff,LowEnergyMask(Q),buzzMask(Q),beepMask(Q));
+%           fv = extractFrameFeatures(frames(Q,:),fname{P},frequency,mfccCoff,LowEnergyMask(Q),buzzMask(Q),beepMask(Q));
+%           fv = updateFeatureVector(fv,false);
+            K = K+1;
+        catch err
+            errmsg = sprintf('Feature error for file %s in frame %d, skipping frame',tt,Q);
+            disp(errmsg);
+            err
+            continue;
+        end
     end
 end
 % unlock the memory of the persistent variables
