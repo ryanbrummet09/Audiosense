@@ -27,12 +27,15 @@ function [ trainingSet, testingSet, GMMSet ] = createTestingTrainingSet( trueFea
 [r c] = size(trueFeatureMatrix);
 trainingSetSize = ceil(0.9 .* r);
 [trainingSet, idx] = datasample(trueFeatureMatrix,trainingSetSize);
-testingSet = [];
-[GMMSet,gmmidx] = datasample(trainingSet,ceil(0.6*trainingSetSize),true);
-for P=1:length(trueFeatureMatrix)
-    if isempty(find(idx==P))
-        testingSet(end+1,:) = trueFeatureMatrix(P,:);
-    end
+if r < 10000
+    GMMSet = datasample(trainingSet,ceil(0.1*trainingSetSize),'Replace',true);
+else
+    GMMSet = datasample(trainingSet,ceil(0.01*trainingSetSize),'Replace',true);
 end
+toKeep = true(1,r);
+for P=1:length(idx)
+    toKeep(idx(P)) = false;
+end
+testingSet = trueFeatureMatrix(toKeep,:);
 end
 
