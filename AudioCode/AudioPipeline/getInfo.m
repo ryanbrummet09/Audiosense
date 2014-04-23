@@ -6,8 +6,8 @@ contents = strsplit(fname,'/');
 contents = contents{end};
 contents = upper(strsplit(contents,'.'));
 t = strsplit(contents{1},'-');
-t = strsplit(t{2},'EMA');
-pid = str2num(t{2});
+t = strsplit(t{end},'EMA');
+pid = str2num(t{end});
 cid = str2num(contents{2});
 sid = str2num(contents{3});
 end
