@@ -61,7 +61,7 @@ K = 1;
 
 for P=1:length(fname)        
     f = fname{P};
-    tt = strsplit(fname{P},'/');
+    tt = strsplit(f,'/');
     tt = tt{end};
 %     obtain the locations of the buzzes and beeps
     try
