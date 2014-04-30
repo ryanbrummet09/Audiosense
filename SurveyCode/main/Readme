@@ -1,0 +1,12 @@
+audioSurveyProc.m - used to extract data, normalize, and map attributes
+findRMSOfAllPossibleMappings.m - used to find the best attribute to map onto.
+	Takes a brute force approach.  im and qol not used.
+findRMSOfAllPossibleMappings2.m - used to find the best attribute to map onto.
+	Takes a brute force approach.  All attributes are used.
+
+To use either findRMSOfAllPossibleMappings(both versions) use
+	rmsVals = findRMSOfAllPossibleMappings('file name', #runs)
+
+#runs gives the number of times to evaluate each possible sampling and mapping
+policy.  We use this since randomization may affect our final answers. 
+I typically I have been using #runs = 5.
