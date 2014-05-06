@@ -83,6 +83,7 @@ for P=1:length(fname)
             disp(s);
             featureVector = nan(numberOfSamplesToStore,23);
             R = R+1;
+            K=1;
         end
 %         if there are buzzes or beeps in the frame, we drop them
         if buzzMask(Q) | beepMask(Q)
