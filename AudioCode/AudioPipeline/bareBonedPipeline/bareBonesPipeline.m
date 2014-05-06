@@ -121,6 +121,7 @@ varFname = strcat(varFnameTemplate,num2str(R));
 save(varFname,'featureVector');
 s = sprintf('Saved variable %s.mat',varFname);
 disp(s);
+disp('Done!');
 
 end
 
