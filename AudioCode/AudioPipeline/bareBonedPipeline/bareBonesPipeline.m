@@ -37,7 +37,7 @@ fname = importdata(fileListName);
 %% Feature computation
 % we start out with a predetermined size feature vector
 numberOfSamplesToStore = 500000;
-featureVector = nan(numberOfSamplesToStore,23);
+featureVector = nan(numberOfSamplesToStore,11+mfccCoff);
 R = 1;
 varFnameTemplate = strcat('featureVector_',runTag,'_');
 
@@ -81,7 +81,7 @@ for P=1:length(fname)
             save(varFname,'featureVector');
             s = sprintf('Saved variable %s.mat',varFname);
             disp(s);
-            featureVector = nan(numberOfSamplesToStore,23);
+            featureVector = nan(numberOfSamplesToStore,11+mfccCoff);
             R = R+1;
             K=1;
         end

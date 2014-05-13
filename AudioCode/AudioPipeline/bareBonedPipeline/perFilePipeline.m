@@ -34,7 +34,7 @@ end
 %% Feature computation
 % we start out with a predetermined size feature vector
 numberOfSamplesToStore = numberOfRows;
-featureVector = nan(numberOfSamplesToStore,23);
+featureVector = nan(numberOfSamplesToStore,11+mfccCoff);
 
 % The rmsThreshold is obtained from emperical studies, these can be checked
 % out in the TestingAndValidation folder
