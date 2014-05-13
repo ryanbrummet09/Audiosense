@@ -74,10 +74,9 @@ for Q=1:length(frames)
     if buzzMask(Q) | beepMask(Q)
         % drop the frames with buzz or beep
         [ptid,cid,sid] = getInfo(f);
-        fv = [];
-        fv(1,end+1) = ptid; fv(1,end+1)=  cid; fv(1,end+1) = sid;
-        fv(1,end+1:end+18) = 0;
-        fv(1,end+1) = buzzMask(Q);  fv(1,end+1) = beepMask(Q);
+        fv = zeros(1,11+mfccCoff);
+        fv(1) = ptid; fv(2)=  cid; fv(3) = sid;
+        fv(end-1) = buzzMask(Q);  fv(end) = beepMask(Q);
             
 %             the feature vector is filled with blanks in this case
 %             fv = updateFeatureVector(fv,false);
