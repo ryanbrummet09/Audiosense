@@ -30,7 +30,7 @@ trainingSetSize = ceil(0.9 .* r);
 if r < 10000
     GMMSet = datasample(trainingSet,ceil(0.1*trainingSetSize),'Replace',true);
 else
-    GMMSet = datasample(trainingSet,ceil(0.01*trainingSetSize),'Replace',true);
+    GMMSet = datasample(trainingSet,2000,'Replace',true);
 end
 toKeep = true(1,r);
 for P=1:length(idx)
