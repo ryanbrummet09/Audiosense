@@ -1,4 +1,4 @@
-function [ l_buzz,l_beep, signal ] = buzzBeepFilter( signal )
+function [ l_buzz,l_beep ] = buzzBeepFilter( signal )
 %BUZZBEEPFILTER Removes the buzz and beep from the frame
 %   BUZZBEEPFILTER Removes the buzz and beeps introduced in the audio due
 %   to the haptic and sonus feedback mechanism of AudioSense. This filter

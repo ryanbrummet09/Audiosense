@@ -10,7 +10,7 @@ function [ locs_buzz, locs_beep, signal ] = preProcess(filename)
 %   See also, BUZZBEEPFILTER
 
 signal = getSoundData(filename);
-[locs_buzz, locs_beep, originalSignal] = buzzBeepFilter(signal);
+[locs_buzz, locs_beep] = buzzBeepFilter(signal);
 
 
 end
