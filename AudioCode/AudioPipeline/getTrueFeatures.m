@@ -20,6 +20,7 @@ function [ trueFeatureMatrix ] = getTrueFeatures( featureMatrix )
 %   See also EXTRACTFRAMEFEATURES
 
 trueFeatureMatrix = featureMatrix(featureMatrix(:,end-2)==0 & featureMatrix(:,end-1)==0 & featureMatrix(:,end)==0,:);
+trueFeatureMatrix = trueFeatureMatrix(:,1:end-3);
 
 end
 
