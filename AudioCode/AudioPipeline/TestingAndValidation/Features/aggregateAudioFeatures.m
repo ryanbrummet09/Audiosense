@@ -1,8 +1,25 @@
 function [ aggregatedFeatures ] = aggregateAudioFeatures( matFilePath, ...
                                     statisticFunctionHandle)
 %AGGREGATEAUDIOFEATURES calculates the spec. statistics for each audio file
-%   Detailed explanation goes here
+%   Input:
+%           matFilePath             :       string containing the full file
+%                                           path of the audio file
+%           statisticFunctionHandle :       the function handle to the
+%                                           statistic that needs to be
+%                                           calculated. Currently we only
+%                                           support @median(default) or
+%                                           @mean.
+% 
+%   Output:
+%           aggregatedFeatures      :       the features of the given file
+%                                           aggregated using the statistic
+%                                           passed as the argument
 
+if ~(isequal(statisticFunctionHandle, @median) | ...
+        isequal(statisticFunctionHandle,@mean))
+    statisticFunctionHandle = @median;
+end
+                        
 temp = load(matFilePath);
 temp = temp.var;
 [r,c] = size(temp);
