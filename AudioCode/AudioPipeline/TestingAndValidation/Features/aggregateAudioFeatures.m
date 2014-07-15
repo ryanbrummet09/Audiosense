@@ -31,6 +31,7 @@ for P=4:c-3
     feature = temp(:,P);
     % make sure that the NaNs are removed before computing the statistic
     feature = feature(~isnan(feature(:)));
+    feature = feature(~isinf(feature(:)));
     aggregatedFeatures(1,P) = feval(statisticFunctionHandle,feature);
 end
 
