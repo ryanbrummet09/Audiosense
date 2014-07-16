@@ -12,8 +12,8 @@ function [ surveyDataset ] = mapFeaturesScoresContexts( surveyDataset, ...
 %           statisticFunctionHandle :       the function handle for the
 %                                           statistic we need to compute,
 %                                           right now we only support
-%                                           @median (default), @mean and
-%                                           @kurtosis.
+%                                           @median (default), @mean, @var,
+%                                           @kurtosis, and @skewness.
 % 
 %   Output:
 %           surveyDataset           :       modified survey dataset, this
