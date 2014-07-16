@@ -38,7 +38,7 @@ end
 save('dataVariables/agF','aggregatedFeatures');
 disp('Done all!');
 %% make additions to the dataset
-n = length(surveyDataset);
+n = height(surveyDataset);
 newEntries = nan(n,1);
 disp('Adding audio features to dataset');
 surveyDataset.ZCR = newEntries; surveyDataset.RMS = newEntries;
