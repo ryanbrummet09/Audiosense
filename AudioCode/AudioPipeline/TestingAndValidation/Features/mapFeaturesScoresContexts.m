@@ -30,7 +30,7 @@ aggregatedFeatures = nan(n,c-3);
 disp('Getting aggregated features');
 for P=1:length(audioFileList)
     if 0 == mod(P,100)
-        disp('Done %d/%d',P,length(audioFileList));
+        disp(sprintf('Done %d/%d',P,n));
     end
     aggregatedFeatures(P,:) = aggregateAudioFeatures(audioFileList{P},...
         statisticFunctionHandle);
