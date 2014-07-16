@@ -7,16 +7,17 @@ function [ aggregatedFeatures ] = aggregateAudioFeatures( matFilePath, ...
 %           statisticFunctionHandle :       the function handle to the
 %                                           statistic that needs to be
 %                                           calculated. Currently we only
-%                                           support @median(default) or
-%                                           @mean.
-% 
+%                                           support @median(default),
+%                                           @mean and @kurtosis.
+%                                       
 %   Output:
 %           aggregatedFeatures      :       the features of the given file
 %                                           aggregated using the statistic
 %                                           passed as the argument
 
 if ~(isequal(statisticFunctionHandle, @median) | ...
-        isequal(statisticFunctionHandle,@mean))
+        isequal(statisticFunctionHandle,@mean) |...
+        isequal(statisticFunctionHandle,@kurtosis))
     statisticFunctionHandle = @median;
 end
                         
