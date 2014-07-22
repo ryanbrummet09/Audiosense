@@ -29,7 +29,7 @@ end
 x = x(toKeep);
 y = y(toKeep);
 %% if there are less than 10 elements, do not continue
-if 10 > length(x)
+if 3 > length(x)
     disp(sprintf('Too few elements for patient %s attribute %s in type %s',...
         patientID,DSType));
     return;
