@@ -118,14 +118,16 @@ if boxThePlot
         [temps, xind] = sort(x);
         xn = x(xind);
         yn = ynew(xind);
-        line([xn(1) xn(2)], [yn(1) yn(2)],'Color','g');
+        line([xn(1) xn(end)], [yn(1) yn(end)],'Color','g');
         xlabel(xlabelC);
         ylabel(ylabelC);
         title(sprintf('rho:%f,PID:%s,Type:%s',rho,patientID,...
             DSType));
         tempArgOut = {'patient','DSType','xType','yType','rho','x0','x1';...
             patientID, DSType,pltLabel,ylabelC, rho, b(1), b(2)};
-        varargout{1} = cell2table(tempArgOut);
+        tempT = cell2table(tempArgOut(2,:));
+        tempT.Properties.VariableNames = tempArgOut(1,:);
+        varargout{1} = tempT;
 end
 end
 
