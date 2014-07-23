@@ -110,6 +110,11 @@ if boxThePlot
         plot(x,y,'bo');
         h = lsline;
         set(h,'Color',[1 0 0]);
+        b = robustfit(x,y);
+        ynew = nan(size(y));
+        ynew = b(1) + b(2)*y;
+        hold on;
+        plot(x,ynew,'g-');
         xlabel(xlabelC);
         ylabel(ylabelC);
         title(sprintf('rho:%f,PID:%s,Type:%s',rho,patientID,...
