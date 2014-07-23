@@ -114,7 +114,10 @@ if boxThePlot
         ynew = nan(size(y));
         ynew = b(1) + b(2)*y;
         hold on;
-        plot(x,ynew,'g-');
+        [temps, xind] = sort(x);
+        xn = x(xind);
+        yn = ynew(xind);
+        line([xn(1) xn(2)], [yn(1) yn(2)],'Color','g');
         xlabel(xlabelC);
         ylabel(ylabelC);
         title(sprintf('rho:%f,PID:%s,Type:%s',rho,patientID,...
