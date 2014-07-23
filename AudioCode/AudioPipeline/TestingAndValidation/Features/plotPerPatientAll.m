@@ -1,4 +1,4 @@
-function plotPerPatientAll( varargin )
+function [varargout] = plotPerPatientAll( varargin )
 %PLOTPERPATIENTALL Summary of this function goes here
 %   Detailed explanation goes here
 attList = {'RMS','ZCR','SRF','Entropy'};
@@ -43,7 +43,7 @@ for P=3:1:length(varargin)
                 plist(Q),DSType,height(temp)));
             continue;
         end
-        plotAllFunction(temp,attList,boxOutcomes,DSType,num2str(plist(Q)));
+        varargout{1} = plotAllFunction(temp,attList,boxOutcomes,DSType,num2str(plist(Q)));
     end
 end
 end

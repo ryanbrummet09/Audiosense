@@ -1,4 +1,4 @@
-function plotCorrelation( x, y, xlabelC, ylabelC, subplotStatement, ...
+function [varargout] = plotCorrelation( x, y, xlabelC, ylabelC, subplotStatement, ...
                           removeFiftyX, removeFiftyY, boxThePlot, ...
                           patientID, DSType)
 %PLOTCORRELATION Summary of this function goes here
@@ -106,6 +106,7 @@ if boxThePlot
         xlabel(pltLabel);
         title(sprintf('rho:%f,PID:%s,Type:%s',rho,patientID,...
             DSType));
+        varargout{1} = table;
  else
         plot(x,y,'bo');
         h = lsline;
@@ -121,7 +122,10 @@ if boxThePlot
         xlabel(xlabelC);
         ylabel(ylabelC);
         title(sprintf('rho:%f,PID:%s,Type:%s',rho,patientID,...
-            DSType));   
+            DSType));
+        tempArgOut = {'patient','DSType','xType','yType','rho','x0','x1';...
+            patientID, DSType,pltLabel,ylabelC, rho, b(1), b(2)};
+        varargout{1} = cell2table(tempArgOut);
 end
 end
 
