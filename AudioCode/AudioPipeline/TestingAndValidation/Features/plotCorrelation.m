@@ -37,9 +37,10 @@ x = x(toKeep);
 y = y(toKeep);
 
 %% if there are less than 10 elements, do not continue
-if 3 > length(x)
+if 10 > length(x)
     disp(sprintf('Too few elements for patient %s attribute %s in type %s',...
         patientID,DSType));
+    varargout{1} = table;
     return;
 end
 %% calculate correlation
