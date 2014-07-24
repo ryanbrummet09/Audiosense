@@ -1,6 +1,7 @@
 function [varargout] = plotPerPatientAll( varargin )
 %PLOTPERPATIENTALL Summary of this function goes here
 %   Detailed explanation goes here
+tempOutTable = table;
 attList = {'RMS','ZCR','SRF','Entropy'};
 for P=0:1:12
     attList{end+1} = sprintf('mfcc%d',P);
@@ -43,9 +44,11 @@ for P=3:1:length(varargin)
                 plist(Q),DSType,height(temp)));
             continue;
         end
-        varargout{1} = plotAllFunction(temp,attList,boxOutcomes,DSType,num2str(plist(Q)));
+        temp = plotAllFunction(temp,attList,boxOutcomes,DSType,num2str(plist(Q)));
+        tempOutTable = [tempOutTable; temp];
     end
 end
+varargout{1} = tempOutTable;
 end
 
 
