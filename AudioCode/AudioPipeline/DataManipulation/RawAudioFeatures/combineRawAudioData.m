@@ -66,7 +66,6 @@ for P=1:length(surveyFeatures)
 end
 %  initialize the combined dataset with the variable names
 combinedDS = table;
-combinedDS.Properties.VariableNames = featureTitle;
 pids = toUseSurveyDS.patient;
 cids = toUseSurveyDS.condition;
 sids = toUseSurveyDS.session;
