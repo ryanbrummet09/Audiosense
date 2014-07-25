@@ -72,6 +72,7 @@ cids = toUseSurveyDS.condition;
 sids = toUseSurveyDS.session;
 % get the actual feature values
 for P=1:length(pids)
+    disp(sprintf('P:%d C:%d S:%d',pids(P),cids(P),sids(P)));
     fpath = toUseAudioFeatureDS.path(...
         toUseAudioFeatureDS.patient==pids(P) & ...
         toUseAudioFeatureDS.condition==cids(P) & ...
@@ -80,7 +81,7 @@ for P=1:length(pids)
 %         if no audio file exists for the corresponding survey
         continue;
     end
-    tempFF = load(fpath);
+    tempFF = load(fpath{1});
     tempFF = tempFF.var;
     tempFF = num2cell(tempFF);
     [r c] = size(tempFF);
