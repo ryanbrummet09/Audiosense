@@ -51,23 +51,23 @@ if strcmp(modelTech,'userBuilt')
     patientIDs = unique(trainingSet.patient);
     conditionIDs = unique(trainingSet.condition);
     depVars = {'ac','lc','tf','tl','nl','nz','vc','cp','rs'};
-    modelTech = '';
+    model = '';
     index = 1;
     for k = 1 : size(depVars,2)
-        if strcmp(modelTech,'')
-            modelTech = strcat(strcat('patient','*'),depVars{k});
+        if strcmp(model,'')
+            model = strcat(strcat('patient','*'),depVars{k});
         else
-            modelTech = strcat(strcat(modelTech,{' + '}),strcat(strcat('patient','*'),depVars{k}));
+            model = strcat(strcat(model,{' + '}),strcat(strcat('patient','*'),depVars{k}));
         end
-        modelTech = strcat(strcat(modelTech,{' + '}),strcat(strcat('condition','*'),depVars{k}));
+        model = strcat(strcat(model,{' + '}),strcat(strcat('condition','*'),depVars{k}));
     end
-    modelTech = char(modelTech);
-    modelTech = strcat({'score ~ 1 + '},modelTech);
-    modelTech = char(modelTech);
+    model = char(model);
+    model = strcat({'score ~ 1 + '},model);
+    model = char(model);
 end
 
 %% Build Model
-mdl = stepwiseglm(trainingTable,modelTech,'Criterion',criterion,'CategoricalVars',[1:size(trainingTable,2) - 1]);
+mdl = stepwiseglm(trainingTable,model,'Criterion',criterion,'CategoricalVars',[1:size(trainingTable,2) - 1]);
 
 %% Evaluate Model against validation set (find coefficient of determination)
 %remove dummy variables that are not part of the created model
