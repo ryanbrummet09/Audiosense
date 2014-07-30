@@ -26,7 +26,7 @@ robustFit = false; %if false, poly fit is used to find best mapping per
                    %mapping pair for deg = 1:maxDeg. if true, robustfit is 
                    %used to find the best mapping per mapping pair.
 maxDeg = 5;
-groupVars = {'ac', 'lc', 'nz', 'patient'};  %used to build a composite variable that is used to statify in cross validation
+groupVars = {'ac', 'lc', 'nz', 'patient','condition'};  %used to build a composite variable that is used to statify in cross validation
 randomizeDataSampleOrder = true;
 bestMapPickMethod = 1;  %1 pick the mapping with the least error out of the all folds
                         %2 pick the mapping with the median error
@@ -243,10 +243,14 @@ for norm = 1 : 3
                             mapAttrAvg = mean(innerTrainingSet(trainingIndexes,:).(attributes{mapAttr}));
                             
                             %find spearmans coeficient
-                            spearmanVal(targetAttr,mapAttr) = sum((innerTrainingSet(trainingIndexes,:).(attributes{targetAttr}) - targetAttrAvg) .* ...
-                                (innerTrainingSet(trainingIndexes,:).(attributes{mapAttr}) - mapAttrAvg)) / ...
-                                sqrt(sum(((innerTrainingSet(trainingIndexes,:).(attributes{targetAttr}) - targetAttrAvg).^2)) * ...
-                                sum(((innerTrainingSet(trainingIndexes,:).(attributes{mapAttr}) - mapAttrAvg).^2)));
+                            spearmanVal(targetAttr,mapAttr) = corr(innerTrainingSet(trainingIndexes,:).(attributes{targetAttr}), ...
+                                innerTrainingSet(trainingIndexes,:).(attributes{mapAttr}),'type','Spearman');
+                            
+                            
+%                             spearmanVal(targetAttr,mapAttr) = sum((innerTrainingSet(trainingIndexes,:).(attributes{targetAttr}) - targetAttrAvg) .* ...
+%                                 (innerTrainingSet(trainingIndexes,:).(attributes{mapAttr}) - mapAttrAvg)) / ...
+%                                 sqrt(sum(((innerTrainingSet(trainingIndexes,:).(attributes{targetAttr}) - targetAttrAvg).^2)) * ...
+%                                 sum(((innerTrainingSet(trainingIndexes,:).(attributes{mapAttr}) - mapAttrAvg).^2)));
                         else
                             spearmanVal(targetAttr,mapAttr) = 1; 
                         end

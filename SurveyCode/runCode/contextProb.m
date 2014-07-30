@@ -260,14 +260,43 @@ for k = 1 : size(contextCount,1)
         end
     end
     if size(tempStr,2) == 0
-        tempStr = strcat('CND',num2str(contextCountStr(k,11))); 
+        tempStr = strcat('CND',num2str(contextCountStr(k,10:11))); 
+    elseif ~strcmp(num2str(contextCountStr(k,10:11)),'00')
+        tempStr =  strcat(tempStr,(strcat('CND',num2str(contextCountStr(k,10:11)))));
     end
-    tempStr = tempStr(1,1:size(tempStr,2) - 1);
+    
     temp(k) = cellstr(tempStr);
 end
 contextCount2 = table;
-contextCount2.contextSubset = temp';
+contextCount2.contextSubset = contextCount(:,1);
+contextCount2.contextSubset2 = temp';
 contextCount2.numInDataSet = contextCount(:,2);
 contextCount2.prob = contextCount(:,3);
-save('contextCountAndProb','contextCount');
-%save('contextCountAndProb','contextCount');
+
+%find subsets
+for k = 1 : size(contextCount,1)
+    temp = num2str(contextCount(k,1)); 
+    index = 0;
+    for j = 1 : size(temp,2)
+        if strcmp(temp(j),'9') && j < size(temp,2)
+            continue;
+        elseif ~strcmp(temp(j),' ') && ~strcmp(temp(j),'0')
+            index = index + 1; 
+        end
+    end
+    contextSize(k) = index;
+end
+contextSubsetSize1 = contextCount(contextSize == 1,:);
+contextSubsetSize2 = contextCount(contextSize == 2,:);
+contextSubsetSize3 = contextCount(contextSize == 3,:);
+contextSubsetSize4 = contextCount(contextSize == 4,:);
+contextSubsetSize5 = contextCount(contextSize == 5,:);
+contextSubsetSize6 = contextCount(contextSize == 6,:);
+contextSubsetSize7 = contextCount(contextSize == 7,:);
+contextSubsetSize8 = contextCount(contextSize == 8,:);
+contextSubsetSize9 = contextCount(contextSize == 9,:);
+contextSubsetSize10 = contextCount(contextSize == 10,:);
+
+save('contextCountAndProb','contextCount2','contextSubsetSize1','contextSubsetSize2','contextSubsetSize3',...
+    'contextSubsetSize4','contextSubsetSize5','contextSubsetSize6','contextSubsetSize7','contextSubsetSize8',...
+    'contextSubsetSize9','contextSubsetSize10');

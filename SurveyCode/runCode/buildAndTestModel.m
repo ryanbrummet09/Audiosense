@@ -11,7 +11,7 @@ clc;
 modelTech = 'userBuilt';  %options are constant, linear, interactions, purequadratic, quadratic, polyijk, or userBuilt
 criterion = 'rsquared';  %options are Deviance (default), sse, aic (akaike information criterion),
                     %bic (bayesian information criterion), rsquared, adjrsquared
-combineTech = 'SUMADJR'; %can be AVG, SUM, MEDIAN, STD
+combineTech = 'SUMADJ'; %can be AVG, SUM, MEDIAN, STD
 target = 'NoMap';
 useDemoData = false;
 norm = 'NoNorm';  %can be NoNorm, GlobalNorm, or UserNorm
@@ -20,6 +20,7 @@ usedContexts = {'listening','ac', 'lc', 'tf', 'vc', 'tl', 'nl', 'rs', 'cp', 'nz'
 useNaNVals = false;
 plotError = false;
 sendEmail = false;
+fixHA = true;
 
 %% load data
 load(dataFileName);
@@ -51,6 +52,9 @@ validationTable = table2dataset(validationTable);
 %different user model is built (if the model is different that is)
 if strcmp(modelTech,'userBuilt')
     data = [trainingTable; validationTable];
+    if fixHA
+        data = data(data.condition ~= 5,:); 
+    end
     depVars = {'listening','ac','lc','tf','tl','nl','nz','vc','cp','rs'};
     model = '';
     for k = 1 : size(depVars,2)
@@ -69,7 +73,7 @@ if strcmp(modelTech,'userBuilt')
     for k = 1 : size(predictiveNames,1)
         pickedCoefArray(:,k) = data.(char(predictiveNames(k,1))); 
     end
-    pickedCoefArray(:,size(pickedCoefValidationArray,2) + 1) = data.score;
+    pickedCoefArray(:,size(pickedCoefArray,2) + 1) = data.score;
 
     temp = mdl.feval(pickedCoefArray(:,1:size(predictiveNames)));
     temp(temp < 0) = 0;

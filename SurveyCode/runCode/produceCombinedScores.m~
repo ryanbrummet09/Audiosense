@@ -6,7 +6,7 @@ close all;
 clear;
 clc;
 
-combineTech = 'SUMADJ';  %can be SUMADJ, AVG, MEDIAN, or STD
+combineTech = 'AVG';  %can be SUMADJ, AVG, MEDIAN, or STD
 targetAttr = 'NoMap';  %NoMap for no map otherwise one of {'sp','le','ld2','lcl','ap','st'};
 normTech = 'NoNorm';  %can be NoNorm, GlobalNorm, or UserNorm;
 mapTech = 'robustMappingGraphs';  %can be robustMappingGraphs polyMappingGraphs robustMappingGraphsWtOut_______(list attr) or polyMappingGraphsWtOut______(list attr)
@@ -56,7 +56,7 @@ randomizeDataSampleOrder = true;
 %1 for avg, 2 for sum, 3 for median, 4 for std, %MIN DOES NOT WORK SO IT IS LIKELY THAT MAX DOESN'T AS WELL
 if strcmp(combineTech,'AVG')
     combineScoreTechnique = 1;
-elseif strcmp(combineTech,'SUMADJ')
+elseif strcmp(combineTech,'SUMADJR')
     combineScoreTechnique = 2;
 elseif strcmp(combineTech,'MEDIAN')
     combineScoreTechnique = 3;
@@ -232,7 +232,7 @@ end
 if combineScoreTechnique == 1
     combinedAttr = nanmean(normMappedAttr')';
 elseif combineScoreTechnique == 2
-    combinedAttr = nansum(normMappedAttr')' ./ sum((~isnan(normMappedAttr))')';
+    combinedAttr = round(nansum(normMappedAttr')' ./ sum((~isnan(normMappedAttr))')');
 elseif combineScoreTechnique == 3
     combinedAttr = nanmedian(normMappedAttr')';
 elseif combineScoreTechnique == 4
