@@ -1,8 +1,8 @@
-function [ varargout ] = getSoundDataChunk(data,...
+function [ varargout ] = getSoundDataChunk(filename,...
     startPointInSeconds, endPointInSeconds, samplingFrequency)
 %GETSOUNDDATACHUNK extracts a part of the file
 %   Input:
-%           data                :       data extracted from sound file
+%           filename            :       file containing the sound data
 %           startPointInSeconds :       the array containing the starting
 %                                       points for the chunks
 %           endPointsInSeconds  :       the array containing the end points
@@ -27,6 +27,7 @@ if length(startPointInSeconds) ~= length(endPointInSeconds)
     disp(sprintf('unequal number of start and end points'));
     return;
 end
+data = getSoundData(filename);
 startSample = startPointInSeconds*samplingFrequency;
 endSample = endPointInSeconds*samplingFrequency;
 tempOut ={};
