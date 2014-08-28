@@ -24,8 +24,16 @@ function [ buzzMask, beepMask, frames ] = framing( audioSignal, frequency, frame
 %   3. Data is stored in the little endian form.
 
 %audioSignal = getSoundData(filename);
+
+
 frameSizeSamples = frequency .* frameSizeSeconds;
 frames = enframe(audioSignal,frameSizeSamples,frameSizeSamples,'r');
+% return only the frames in the absence of other information
+if 5 > nargin
+    buzzMask =[];
+    beepMask = [];
+    return;
+end
 buzzMask = false(1,length(frames));
 beepMask = false(1,length(frames));
 
