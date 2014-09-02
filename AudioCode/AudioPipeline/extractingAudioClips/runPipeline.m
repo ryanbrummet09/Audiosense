@@ -22,11 +22,11 @@ parfor P=1:n
     lastSpectralAmp = [];
     for Q=1:r
         if 1 == Q
-            [fv, lastSpectralAmp] = extractClipFrameFeatures( data, fs, ...
-               mfccCoff, srfLimits, subbands);
+            [fv, lastSpectralAmp] =extractClipFrameFeatures(frames(Q,:),...
+                fs, mfccCoff, srfLimits, subbands);
         else
-            [fv, lastSpectralAmp] = extractClipFrameFeatures( data, fs, ...
-                mfccCoff, srfLimits, subbands, lastSpectralAmp);
+            [fv, lastSpectralAmp] =extractClipFrameFeatures(frames(Q,:),...
+                fs, mfccCoff, srfLimits, subbands, lastSpectralAmp);
         end
         featureVector(end+1,:) = fv;
     end
