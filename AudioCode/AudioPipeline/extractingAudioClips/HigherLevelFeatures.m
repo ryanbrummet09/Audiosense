@@ -60,8 +60,7 @@ for P=1:c
 %     kurtosis
     featureVector{1,end+1} = kurtosis(featureColumn);
 %     number of peaks
-    [peakAmps, peakLocs] = findpeaks(abs(featureColumn),'threshold',...
-                                        median(abs(featureColumn)));
+    [peakAmps, peakLocs] = findpeaks(abs(featureColumn));
     featureVector{1,end+1} = length(peakAmps);
 %     mean amplitude of peaks
     featureVector{1,end+1} = mean(peakAmps);
