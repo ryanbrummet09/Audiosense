@@ -69,5 +69,6 @@ end
 featureVector{1,end+1} = dataStruct.label;
 featureTable = table;
 featureTable = cell2table(featureVector);
+featureVariableNames{1,end+1} = 'label';
 featureTable.Properties.VariableNames = featureVariableNames;
 end
