@@ -14,7 +14,7 @@ function [ subbandPower ] = logSubbandPower( data, fs, subbands )
 [r,c] = size(subbands);
 subbandPower = zeros(1,r);
 for P=1:r
-    subbandPower(P) = bandpower(data,fs,[subbands(P,1), subbands(P,2)]);
+    subbandPower(P) = bandpower(data,fs,[subbands(P,1) subbands(P,2)]);
 end
 end
 
