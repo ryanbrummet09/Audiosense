@@ -1,5 +1,5 @@
 function runPipeline( fileList, fs, mfccCoff, srfLimits, ...
-    frameSizeInSeconds, numberOfSubbands )
+    frameSizeInSeconds, numberOfSubbands, wavFiles )
 %RUNPIPELINE Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -12,10 +12,17 @@ parobject = parpool;
 %% read audio file
 n = length(fileList);
 subbands = getLogSubbands(fs, numberOfSubbands);
+if 6 == nargin
+    wavFiles = false;
+end
 parfor P=1:n
     fname = fileList{P};
     disp(fname);
-    data = getSoundData(fname);
+    if wavFiles
+        data = getSoundData(fname,wavFiles);
+    else
+        data = getSoundData(fname);
+    end
     [bz,bp,frames] = framing(data,fs,frameSizeInSeconds);
     [r,c] = size(frames);
     featureVector = [];
