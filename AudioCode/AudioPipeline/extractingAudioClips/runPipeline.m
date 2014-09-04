@@ -40,7 +40,11 @@ parfor P=1:n
     toSaveFname = strsplit(fname,'/');
     toSaveFname = toSaveFname{end};
     toSaveFname = strsplit(toSaveFname,'.');
-    toSaveFname = strcat('features/',toSaveFname{1});
+    if wavFiles
+        toSaveFname = strcat('features_wav/',toSaveFname{1});
+    else
+        toSaveFname = strcat('features/',toSaveFname{1});
+    end
     parSaveVariable(toSaveFname,featureVector);
 end
 %% close parallel workers
