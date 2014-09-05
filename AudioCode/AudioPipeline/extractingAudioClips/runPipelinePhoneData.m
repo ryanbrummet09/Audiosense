@@ -63,9 +63,9 @@ parfor P=1:n
     toSaveFname = sprintf('%d_%d_%d_1_%s',pids(P),cids(P),sids(P),...
         labels{P});
     if wavFiles
-        toSaveFname = strcat('features_wav/',toSaveFname{1});
+        toSaveFname = strcat('featuresPhone_wav/',toSaveFname{1});
     else
-        toSaveFname = strcat('features/',toSaveFname{1});
+        toSaveFname = strcat('featuresPhone/',toSaveFname{1});
     end
     parSaveVariable(toSaveFname,featureVector);
 end
