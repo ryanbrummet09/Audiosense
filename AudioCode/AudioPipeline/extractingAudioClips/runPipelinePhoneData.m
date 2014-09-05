@@ -46,6 +46,11 @@ parfor P=1:n
     else
         data = getSoundData(fname);
     end
+    toLookInto = 90*16000;
+    if toLookInto > length(data)
+        toLookInto = length(data);
+    end
+    data = data(1:toLookInto);
     [bz,bp,frames] = framing(data,fs,frameSizeInSeconds);
     [r,c] = size(frames);
     featureVector = [];
