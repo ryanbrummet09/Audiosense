@@ -1,7 +1,22 @@
 function runPipeline( fileList, fs, mfccCoff, srfLimits, ...
     frameSizeInSeconds, numberOfSubbands, wavFiles )
-%RUNPIPELINE Summary of this function goes here
-%   Detailed explanation goes here
+%RUNPIPELINE basic setup of the pipeline
+%   This function creates the features for the annotated files.
+%   Input:
+%           fileList            :           List of files to consider
+%           fs                  :           Sampling frequency
+%           mfccCoff            :           number of mfcc coefficients
+%                                           excluding the zeroth
+%           srfLimits           :           vector containing the limits
+%                                           for calculating the spectral
+%                                           rolloffs, these have to be
+%                                           between 0-1
+%           frameSizeInSeconds  :           Size of the frame in seconds
+%           numberOfSubbands    :           number of subbands to calculate
+%                                           the log subband power
+%           wavFiles            :           This is an optional flag to
+%                                           indicate whether the input
+%                                           files are wav files
 
 %% add dependencies
 addpath ../;
