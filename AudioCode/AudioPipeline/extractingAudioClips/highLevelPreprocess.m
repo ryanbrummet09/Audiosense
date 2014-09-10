@@ -34,20 +34,21 @@ for P=1:length(fileStruct.featureFileList)
     actualFName = strsplit(actualFName,'.');
     actualFName = actualFName{1};
     actualFName = strsplit(actualFName,'_');
-    load(fname);
-    if isempty(var)
+    fdata = load(fname);
+    fdata = fdata.var;
+    if isempty(fdata)
         disp('Empty!');
         continue;
     end
     dataStruct = struct;
-    [r,c] = size(var);
+    [r,c] = size(fdata);
     for Q = 1:numberOfFrames:r
         s = Q;
         e = Q+numberOfFrames;
         if e > r
             e = r;
         end
-        dataStruct.data = var(s:e,:);
+        dataStruct.data = fdata(s:e,:);
         dataStruct.pid = str2num(actualFName{1});
         dataStruct.cid = str2num(actualFName{2});
         dataStruct.sid = str2num(actualFName{3});
