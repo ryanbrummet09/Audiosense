@@ -14,10 +14,17 @@ function highLevelPreprocess( fileStruct )
 %                                           which the high level features
 %                                           are calculated, this is also in
 %                                           seconds
+%               fileStruct.folderToSave :   this is an optional field which
+%                                           allows the user to specify
+%                                           where to save the extracted
+%                                           high level features
 featureTable = table;
 k=0;
 x=1;
 numberOfFrames = floor(fileStruct.windowLength/fileStruct.frameLength);
+if ~isfield(fileStruct,'folderToSave')
+    fileStruct.folderToSave = './';
+end
 for P=1:length(fileStruct.featureFileList)
 %     get the file name, the details of the label etc out
     fname = fileStruct.featureFileList{P};
@@ -54,7 +61,8 @@ for P=1:length(fileStruct.featureFileList)
             featureTable = [featureTable; tempTable];
         end
         if 0 == mod(k,1000)
-            save(sprintf('featureTable_%d',x),'featureTable');
+            save(sprintf('%s/featureTable_%d',fileStruct.folderToSave,x)...
+                ,'featureTable');
             featureTable = table;
             x = x+1;
         end
