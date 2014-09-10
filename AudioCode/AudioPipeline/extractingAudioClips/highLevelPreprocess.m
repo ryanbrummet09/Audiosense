@@ -49,7 +49,8 @@ for P=1:length(fileStruct.featureFileList)
             e = r;
         end
 %         work with atleast 10 samples
-        if 10 > e - r
+        if 10 > e - s
+            disp(sprintf('s:%d, e:%d, r:%d',s,e,r));
             continue;
         end
         dataStruct.features = fdata(s:e,:);
@@ -66,7 +67,7 @@ for P=1:length(fileStruct.featureFileList)
             featureTable = [featureTable; tempTable];
         end
         if 0 == mod(k,1000)
-            save(sprintf('%s/featureTable_%d',fileStruct.folderToSave,x)...
+            save(sprintf('%sfeatureTable_%d',fileStruct.folderToSave,x)...
                 ,'featureTable');
             featureTable = table;
             x = x+1;
