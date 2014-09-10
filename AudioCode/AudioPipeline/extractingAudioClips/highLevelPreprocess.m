@@ -48,6 +48,10 @@ for P=1:length(fileStruct.featureFileList)
         if e > r
             e = r;
         end
+%         work with atleast 10 samples
+        if 10 > e - r
+            continue;
+        end
         dataStruct.data = fdata(s:e,:);
         dataStruct.pid = str2num(actualFName{1});
         dataStruct.cid = str2num(actualFName{2});
