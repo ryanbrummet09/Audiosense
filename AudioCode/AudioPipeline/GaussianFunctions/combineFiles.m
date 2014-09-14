@@ -9,6 +9,10 @@ for P=1:length(fileList)
         [pid,cid,sid] = getMATFileInfo(fileList{P});
         fileFeatures = load(fileList{P});
         fileFeatures = fileFeatures.var;
+        if isempty(fileFeatures)
+            disp('Empty!');
+            continue;
+        end
         [r,c] = size(fileFeatures);
         temp = zeros(r,c+3);
         temp(:,1) = pid;
