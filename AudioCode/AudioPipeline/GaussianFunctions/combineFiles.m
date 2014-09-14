@@ -5,7 +5,7 @@ function [ combinedSet ] = combineFiles( fileList )
 %   combinedSet
 combinedSet = [];
 for P=1:length(fileList)
-        disp(sprintf('Working with %s',fileList{P}));
+        disp(sprintf('Working with %d, %s',P,fileList{P}));
         [pid,cid,sid] = getMATFileInfo(fileList{P});
         fileFeatures = load(fileList{P});
         fileFeatures = fileFeatures.var;
