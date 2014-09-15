@@ -1,7 +1,7 @@
-function [ trainingSet, testingSet ] = createTrainingTestingSet( ...
-                                        fileList, trainingToTestingRatio...
-                                        , returnList)
-%CREATETRAININGTESTINGSET creates training and testing sets
+function [ trainingSet ] = createTrainingSet( fileList, ...
+                                             trainingToTestingRatio...
+                                        , returnList )
+%CREATETRAININGSET picks out the files for creating the GMMs
 %   Input:
 %           fileList                :           list of all the feature 
 %                                               files
@@ -16,25 +16,21 @@ function [ trainingSet, testingSet ] = createTrainingTestingSet( ...
 %                                               testing sets
 % 
 %   Output:
-%           trainingSet             :           the training set 
+%           trainingSet             :           the training set is
+%                                               returned
+% 
+
 if 2 == nargin
     returnList = false;
 end
-[trainingSetFile,idx] = datasample(fileList,floor(...
+trainingSetFile = datasample(fileList,floor(...
                     trainingToTestingRatio*length(fileList)), 'REPLACE',...
                     false);
-toKeep = true(length(fileList),1);
-for P=1:length(idx)
-    toKeep(idx(P)) = false;
-end
-testingSetFile = fileList(toKeep);
 if returnList
     trainingSet = trainingSetFile;
-    testingSet = testingSetFile;
     return;
 else
     trainingSet = combineFiles(trainingSetFile);
-    testingSet = combineFiles(testingSetFile);
 end
 end
 
