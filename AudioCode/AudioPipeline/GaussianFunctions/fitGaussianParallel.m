@@ -17,6 +17,7 @@ addpath ../;
 if endAt < startAt
     error('GaussianFunctions:parallel','endsAt < startsAt');
 end
+trainingSet = normValues(trainingSet);
 parObject = parpool;
 if 7 ~= exist('dataVariables','dir')
     mkdir('dataVariables');
