@@ -13,7 +13,6 @@ function fitGaussianParallel( trainingSet, startAt, ...
 %                                           gaussians at, this has to be,
 %                                           of course, less than startAt
 %   Values are stored in the dataVariables folder
-addpath ../;
 if endAt < startAt
     error('GaussianFunctions:parallel','endsAt < startsAt');
 end
