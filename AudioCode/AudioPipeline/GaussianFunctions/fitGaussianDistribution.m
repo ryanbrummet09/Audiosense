@@ -8,6 +8,6 @@ function [ GMMObject ] = fitGaussianDistribution( toFit, k )
 %           GMMObject       :           GMM object generated after fitting
 %                                       the data
 
-GMMObject = fitgmdist(toFit,k);
+GMMObject = fitgmdist(toFit,k,'Regularize',1e-5);
 end
 
