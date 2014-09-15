@@ -22,7 +22,7 @@ if 7 ~= exist('dataVariables','dir')
     mkdir('dataVariables');
 end
 parfor P=startAt:endAt
-    disp('Fitting %d gaussians',pow2(P));
+    disp(sprintf('Fitting %d gaussians',pow2(P)));
     GMMObject = fitGaussianDistribution(trainingSet(:,4:end),pow2(P));
     parSaveVariable(sprintf('dataVariables/GMMObj_%d',pow2(P)),GMMObject);
 end
