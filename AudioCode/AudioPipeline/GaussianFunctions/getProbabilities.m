@@ -24,6 +24,7 @@ if 4 == nargin
     softCoding = false;
 end
 [r,c] = size(dataSet);
+dataSet = normValues(dataSet);
 allMu = GMMObject.mu;
 allSigma = GMMObject.Sigma;
 gaussProbs = posterior(GMMObject,dataSet(:,4:end));
