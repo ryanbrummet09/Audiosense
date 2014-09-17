@@ -26,22 +26,18 @@ end
 [r,c] = size(dataSet);
 allMu = GMMObject.mu;
 allSigma = GMMObject.Sigma;
-
+gaussProbs = posterior(GMMObject,dataSet(:,4:end));
 for P=1:r
-    gaussianProbs = zeros(1,k);
-    for Q=1:k
-        gaussianProbs(1,Q) = mvncdf(dataSet(P,4:end),allMu(k,:),...
-            allSigma(:,:,k));
-    end
     if softCoding
             tempV = prMatrix(prMatrix(:,1)==dataSet(P,1) & ...
                     prMatrix(:,2)==dataSet(P,2) & ...
                     prMatrix(:,3)==dataSet(P,3),4:end);
             prMatrix(prMatrix(:,1)==dataSet(P,1) & ...
                 prMatrix(:,2)==dataSet(P,2) & ...
-                prMatrix(:,3)==dataSet(P,3),4:end) = tempV + gaussianProbs;
+                prMatrix(:,3)==dataSet(P,3),4:end) = tempV + ...
+                                                     gaussProbs(P,:);
     else
-        idx = find(gaussianProbs == max(gaussianProbs));
+        idx = find(gaussProbs == max(gaussProbs));
         tempV = prMatrix(prMatrix(:,1)==dataSet(P,1) & ...
                 prMatrix(:,2)==dataSet(P,2) & ...
                 prMatrix(:,3)==dataSet(P,3),3+idx);
