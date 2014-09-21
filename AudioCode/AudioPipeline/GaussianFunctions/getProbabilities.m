@@ -23,10 +23,10 @@ function [ prMatrix ] = getProbabilities( GMMObject, dataSet, ...
 if 4 == nargin
     softCoding = false;
 end
-[r,c] = size(dataSet);
 dataSet = normValues(dataSet);
 allMu = GMMObject.mu;
 allSigma = GMMObject.Sigma;
+[r,c] = size(dataSet);
 gaussProbs = posterior(GMMObject,dataSet(:,4:end));
 for P=1:r
     if softCoding
