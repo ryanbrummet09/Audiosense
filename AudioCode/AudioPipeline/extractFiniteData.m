@@ -22,6 +22,7 @@ for P=1:length(fileList)
     end
     [p,c,s] = getInfo(fileList{P});
     toWriteTo = sprintf('%s/%d_%d_%d.audio',pathToSave,p,c,s);
+    disp(sprintf('Written %s',toWriteTo));
     f = open(toWriteTo,'w');
     fwrite(f,data,'short',0,'l');
     fclose(f);
