@@ -38,6 +38,15 @@ subbands = getLogSubbands(fs, numberOfSubbands);
 if 10 == nargin
     wavFiles = false;
 end
+if wavFiles
+    if 7 ~=exist('featuresPhone_wav')
+        mkdir('featuresPhone_wav');
+    end
+else
+    if 7~=exist('featuresPhone')
+        mkdir('featuresPhone');
+    end
+end
 parfor P=1:n
     fname = fileList{P};
     disp(fname);
