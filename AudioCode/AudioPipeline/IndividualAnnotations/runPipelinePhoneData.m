@@ -43,8 +43,8 @@ if wavFiles
         mkdir(sprintf('featuresPhone_wav_%d',int32(frameSizeInSeconds*1000)));
     end
 else
-    if 7~=exist(sprintf('featuresPhone_%d',frameSizeInSeconds*1000))
-        mkdir(sprintf('featuresPhone_%d',frameSizeInSeconds*1000));
+    if 7~=exist(sprintf('featuresPhone_%d',int32(frameSizeInSeconds*1000)))
+        mkdir(sprintf('featuresPhone_%d',int32(frameSizeInSeconds*1000)));
     end
 end
 parfor P=1:n
