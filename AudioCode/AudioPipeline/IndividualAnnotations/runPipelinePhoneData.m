@@ -39,12 +39,12 @@ if 10 == nargin
     wavFiles = false;
 end
 if wavFiles
-    if 7 ~=exist('featuresPhone_wav')
-        mkdir('featuresPhone_wav');
+    if 7 ~=exist(sprintf('featuresPhone_wav_%f',frameSizeInSeconds*1000))
+        mkdir(sprintf('featuresPhone_wav_%f',frameSizeInSeconds*1000));
     end
 else
-    if 7~=exist('featuresPhone')
-        mkdir('featuresPhone');
+    if 7~=exist(sprintf('featuresPhone_%f',frameSizeInSeconds*1000))
+        mkdir(sprintf('featuresPhone_%f',frameSizeInSeconds*1000));
     end
 end
 parfor P=1:n
@@ -72,9 +72,9 @@ parfor P=1:n
     toSaveFname = sprintf('%d_%d_%d_%s',pids(P),cids(P),sids(P),...
         labels{P});
     if wavFiles
-        toSaveFname = strcat('featuresPhone_wav/',toSaveFname);
+        toSaveFname = strcat(sprintf('featuresPhone_wav_%f',frameSizeInSeconds*1000),toSaveFname);
     else
-        toSaveFname = strcat('featuresPhone/',toSaveFname);
+        toSaveFname = strcat(sprintf('featuresPhone_%f',frameSizeInSeconds*1000),toSaveFname);
     end
     parSaveVariable(toSaveFname,featureVector);
 end
