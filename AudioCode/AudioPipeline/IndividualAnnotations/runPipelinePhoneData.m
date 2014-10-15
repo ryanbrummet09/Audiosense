@@ -33,18 +33,18 @@ addpath ../voicebox/;
 %% create parallel workers
 parobject = parpool;
 %% read audio file
-n = length(fileList);
+n = length(fileList);basic
 subbands = getLogSubbands(fs, numberOfSubbands);
 if 10 == nargin
     wavFiles = false;
 end
 if wavFiles
-    if 7 ~=exist(sprintf('featuresPhone_wav_%f',frameSizeInSeconds*1000))
-        mkdir(sprintf('featuresPhone_wav_%f',frameSizeInSeconds*1000));
+    if 7 ~=exist(sprintf('featuresPhone_wav_%d',int32(frameSizeInSeconds*1000)))
+        mkdir(sprintf('featuresPhone_wav_%d',int32(frameSizeInSeconds*1000)));
     end
 else
-    if 7~=exist(sprintf('featuresPhone_%f',frameSizeInSeconds*1000))
-        mkdir(sprintf('featuresPhone_%f',frameSizeInSeconds*1000));
+    if 7~=exist(sprintf('featuresPhone_%d',frameSizeInSeconds*1000))
+        mkdir(sprintf('featuresPhone_%d',frameSizeInSeconds*1000));
     end
 end
 parfor P=1:n
@@ -72,9 +72,9 @@ parfor P=1:n
     toSaveFname = sprintf('%d_%d_%d_%s',pids(P),cids(P),sids(P),...
         labels{P});
     if wavFiles
-        toSaveFname = strcat(sprintf('featuresPhone_wav_%f',frameSizeInSeconds*1000),toSaveFname);
+        toSaveFname = strcat(sprintf('featuresPhone_wav_%d/',int32(frameSizeInSeconds*1000)),toSaveFname);
     else
-        toSaveFname = strcat(sprintf('featuresPhone_%f',frameSizeInSeconds*1000),toSaveFname);
+        toSaveFname = strcat(sprintf('featuresPhone_%d/',int32(frameSizeInSeconds*1000)),toSaveFname);
     end
     parSaveVariable(toSaveFname,featureVector);
 end
