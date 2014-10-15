@@ -33,7 +33,7 @@ addpath ../voicebox/;
 %% create parallel workers
 parobject = parpool;
 %% read audio file
-n = length(fileList);basic
+n = length(fileList);
 subbands = getLogSubbands(fs, numberOfSubbands);
 if 10 == nargin
     wavFiles = false;
