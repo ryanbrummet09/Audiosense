@@ -24,6 +24,10 @@ x=1;
 numberOfFrames = floor(fileStruct.windowLength/fileStruct.frameLength);
 if ~isfield(fileStruct,'folderToSave')
     fileStruct.folderToSave = './';
+else
+    if 7 ~= exist(fileStruct.folderToSave)
+        mkdir(fileStruct.folderToSave);
+    end
 end
 for P=1:length(fileStruct.featureFileList)
 %     get the file name, the details of the label etc out
