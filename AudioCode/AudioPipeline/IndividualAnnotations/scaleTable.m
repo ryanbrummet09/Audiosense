@@ -3,7 +3,7 @@ function [ scaledTable ] = scaleTable( featureTable )
 %   Detailed explanation goes here
 varNames = featureTable.Properties.VariableNames;
 n = length(varNames);
-for P=5:n-1
+for P=4:n-1
     varN = varNames{P};
     val = eval(sprintf('featureTable.%s;',varN));
     ninf = find(~isinf(val) & ~isnan(val));
