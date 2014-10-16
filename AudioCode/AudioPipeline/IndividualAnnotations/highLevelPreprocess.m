@@ -61,10 +61,9 @@ for P=1:length(fileStruct.featureFileList)
         dataStruct.pid = str2num(actualFName{1});
         dataStruct.cid = str2num(actualFName{2});
         dataStruct.sid = str2num(actualFName{3});
-        dataStruct.sno = str2num(actualFName{4});
-        dataStruct.label = actualFName{5};
+        dataStruct.label = actualFName{4};
         if strcmp('media',dataStruct.label)
-            dataStruct.label = strcat(actualFName{5},'_',actualFName{6});
+            dataStruct.label = strcat(actualFName{4},'_',actualFName{5});
         end
         tempTable = HigherLevelFeatures(dataStruct);
         featureTable = [featureTable; tempTable];
