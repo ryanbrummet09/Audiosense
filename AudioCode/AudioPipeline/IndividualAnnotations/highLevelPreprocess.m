@@ -49,7 +49,7 @@ for P=1:length(fileStruct.featureFileList)
             e = r;
         end
 %         work with atleast 10 samples
-        if 10 > e - s
+        if 5 > e - s
             disp(sprintf('s:%d, e:%d, r:%d',s,e,r));
             continue;
         end
@@ -59,21 +59,14 @@ for P=1:length(fileStruct.featureFileList)
         dataStruct.sid = str2num(actualFName{3});
         dataStruct.sno = str2num(actualFName{4});
         dataStruct.label = actualFName{5};
+        if strcmp('media',dataStruct.label)
+            dataStruct.label = strcat(actualFName{5},'_',actualFName{6});
+        end
         tempTable = HigherLevelFeatures(dataStruct);
-        k = k+1;
-        if 1 == mod(k,1000)
-            featureTable = tempTable;
-        else
-            featureTable = [featureTable; tempTable];
-        end
-        if 0 == mod(k,1000)
-            save(sprintf('%sfeatureTable_%d',fileStruct.folderToSave,x)...
-                ,'featureTable');
-            featureTable = table;
-            x = x+1;
-        end
+        featureTable = [featureTable; tempTable];
     end
 end
-save(sprintf('featureTable_%d',x),'featureTable');
+featureTable = scaleTable(featureTable);
+save(sprintf('%sfeatureTable',fileStruct.folderToSave),'featureTable');
 end
 
