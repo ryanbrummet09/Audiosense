@@ -1,4 +1,4 @@
-function [ scaledTable ] = scaleTable( featureTable )
+function [ featureTable ] = scaleTable( featureTable )
 %SCALETABLE Scales the table between 0 and 1
 %   Detailed explanation goes here
 varNames = featureTable.Properties.VariableNames;
