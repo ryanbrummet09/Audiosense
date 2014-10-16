@@ -6,8 +6,7 @@ function [ featureTable ] = HigherLevelFeatures( dataStruct )
 %                                   contains the following fields, viz. pid
 %                                   which indicates the patientID, cid
 %                                   represents the conditionID, sid
-%                                   represents the session ID, sno
-%                                   indicates the internal file identifier,
+%                                   represents the session ID, 
 %                                   features represent the matrix
 %                                   containing the features
 % 
@@ -23,7 +22,7 @@ dataFeatures = {'rms', 'zcr', 'mfcc0', 'mfcc1', 'mfcc2', 'mfcc3', ...
     'scentroid','sentropy'}; 
 data = dataStruct.features;
 featureVector = {};
-featureVariableNames = {'patient','condition','session','sno'};
+featureVariableNames = {'patient','condition','session'};
 for P=1:length(dataFeatures)
     featureN = dataFeatures{P};
     for Q=1:length(featureList)
@@ -34,7 +33,6 @@ end
 featureVector{1,end+1} = dataStruct.pid;
 featureVector{1,end+1} = dataStruct.cid;
 featureVector{1,end+1} = dataStruct.sid;
-featureVector{1,end+1} = dataStruct.sno;
 [r,c] = size(data);
 % per feature extract the high level features
 for P=1:c
