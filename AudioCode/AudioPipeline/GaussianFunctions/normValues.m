@@ -5,7 +5,7 @@ function [ toBeNormalized ] = normValues( toBeNormalized )
 
 [r,c] = size(toBeNormalized);
 toKeepOverall = true(r,1);
-for P=4:c
+for P=5:c
     temp = toBeNormalized(:,P);
     isNanOrIsInf = find(isnan(temp) | isinf(temp));
     nIsNanOrIsInf = find(~isnan(temp) & ~isinf(temp));
