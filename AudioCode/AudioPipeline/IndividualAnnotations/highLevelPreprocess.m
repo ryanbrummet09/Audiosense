@@ -52,8 +52,8 @@ for P=1:length(fileStruct.featureFileList)
         if e > r
             e = r;
         end
-%         work with atleast 10 samples
-        if 5 > e - s
+%         work with atleast 2 samples
+        if 2 > e - s
             disp(sprintf('s:%d, e:%d, r:%d',s,e,r));
             continue;
         end
