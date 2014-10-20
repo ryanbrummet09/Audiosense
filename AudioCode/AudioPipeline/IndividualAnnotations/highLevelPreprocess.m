@@ -13,7 +13,9 @@ function highLevelPreprocess( fileStruct )
 %               fileStruct.windowLength :   the length of the window over
 %                                           which the high level features
 %                                           are calculated, this is also in
-%                                           seconds
+%                                           seconds. If the windowLength is
+%                                           given to be 0 then the complete
+%                                           file is considered.
 %               fileStruct.folderToSave :   this is an optional field which
 %                                           allows the user to specify
 %                                           where to save the extracted
@@ -21,7 +23,11 @@ function highLevelPreprocess( fileStruct )
 featureTable = table;
 k=0;
 x=1;
-numberOfFrames = floor(fileStruct.windowLength/fileStruct.frameLength);
+if 0 < fileStruct.windowLength
+    numberOfFrames = floor(fileStruct.windowLength/fileStruct.frameLength);
+else
+    numberOfFrames = -1;
+end
 if ~isfield(fileStruct,'folderToSave')
     fileStruct.folderToSave = './';
 else
@@ -46,6 +52,9 @@ for P=1:length(fileStruct.featureFileList)
     end
     dataStruct = struct;
     [r,c] = size(fdata);
+    if 0 == fileStruct.windowLength
+        numberOfFrames = r;
+    end
     for Q = 1:numberOfFrames:r
         s = Q;
         e = Q+numberOfFrames;
