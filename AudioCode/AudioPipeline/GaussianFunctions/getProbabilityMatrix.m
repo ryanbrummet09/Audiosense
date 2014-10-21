@@ -17,7 +17,7 @@ labels = dataSet(:,4);
 temp = {};
 for P=1:length(pids)
     temp{end+1} = strcat(num2str(pids(P)),'_',num2str(cids(P)),'_',...
-                         num2str(sids(P)),'_',num2str(labels{P}));
+                         num2str(sids(P)),'_',num2str(labels(P)));
 end
 temp = unique(temp);
 n = length(temp);
