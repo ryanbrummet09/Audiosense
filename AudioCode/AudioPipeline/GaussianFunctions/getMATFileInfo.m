@@ -23,6 +23,8 @@ if multLabel
     if strcmpi(otherInfo,'speecj')
         otherInfo = 'speech';
     end
+    otherInfo = strsplit(otherInfo,'.');
+    otherInfo = otherInfo{1};
 end
 
 end
