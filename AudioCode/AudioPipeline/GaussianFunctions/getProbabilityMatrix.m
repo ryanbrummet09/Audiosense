@@ -21,7 +21,7 @@ for P=1:length(pids)
 end
 temp = unique(temp);
 n = length(temp);
-prMatrix = zeros(n,k+3);
+prMatrix = zeros(n,k+4);
 for P=1:n
     t = temp{P};
     t = strsplit(t,'_');
