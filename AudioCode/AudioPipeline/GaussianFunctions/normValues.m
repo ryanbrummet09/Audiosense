@@ -1,11 +1,16 @@
-function [ toBeNormalized ] = normValues( toBeNormalized )
+function [ toBeNormalized ] = normValues( toBeNormalized, ...
+                              numberOfLabels )
 %NORMVALUES normalize values
 %   Normalizes the values of the input toBeNormalized, removes the rows
-%   which contain NaN or Inf
-
+%   which contain NaN or Inf. The number of labels is an optional field but
+%   indicates how many columns from to the end to ignore if there are any
+%   labels present.
+if 1 == nargin
+    numberOfLabels = 0;
+end
 [r,c] = size(toBeNormalized);
 toKeepOverall = true(r,1);
-for P=5:c
+for P=5:c-numberOfLabels
     temp = toBeNormalized(:,P);
     isNanOrIsInf = find(isnan(temp) | isinf(temp));
     nIsNanOrIsInf = find(~isnan(temp) & ~isinf(temp));
