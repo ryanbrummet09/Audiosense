@@ -81,14 +81,16 @@ parfor P=1:n
         [lr,lc] = size(labelVector);
         featureVector(:,end+1:end+lc) = labelVector;
         toSaveFName = sprintf('%d_%d_%d_lV',pids(P),cids(P),sids(P));
+        toSaveFName = strcat(sprintf('featuresPhone_lV_%d',int32(...
+            frameSizeInSeconds*1000),toSaveFName));
     else
         toSaveFname = sprintf('%d_%d_%d_%s',pids(P),cids(P),sids(P),...
             labels{P});
-    end
-    if wavFiles
-        toSaveFname = strcat(sprintf('featuresPhone_wav_%d/',int32(frameSizeInSeconds*1000)),toSaveFname);
-    else
-        toSaveFname = strcat(sprintf('featuresPhone_%d/',int32(frameSizeInSeconds*1000)),toSaveFname);
+        if wavFiles
+            toSaveFname = strcat(sprintf('featuresPhone_wav_%d/',int32(frameSizeInSeconds*1000)),toSaveFname);
+        else
+            toSaveFname = strcat(sprintf('featuresPhone_%d/',int32(frameSizeInSeconds*1000)),toSaveFname);
+        end
     end
     parSaveVariable(toSaveFname,featureVector);
 end
