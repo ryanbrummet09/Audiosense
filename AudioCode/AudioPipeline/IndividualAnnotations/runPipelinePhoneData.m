@@ -42,13 +42,19 @@ if 10 == nargin
 elseif 11 == nargin
     labelTrackStruct = struct;
 end
-if wavFiles
-    if 7 ~=exist(sprintf('featuresPhone_wav_%d',int32(frameSizeInSeconds*1000)))
-        mkdir(sprintf('featuresPhone_wav_%d',int32(frameSizeInSeconds*1000)));
+if isempty(fieldnames(labelTrackStruct))
+    if wavFiles
+        if 7 ~=exist(sprintf('featuresPhone_wav_%d',int32(frameSizeInSeconds*1000)))
+            mkdir(sprintf('featuresPhone_wav_%d',int32(frameSizeInSeconds*1000)));
+        end
+    else
+        if 7~=exist(sprintf('featuresPhone_%d',int32(frameSizeInSeconds*1000)))
+            mkdir(sprintf('featuresPhone_%d',int32(frameSizeInSeconds*1000)));
+        end
     end
 else
-    if 7~=exist(sprintf('featuresPhone_%d',int32(frameSizeInSeconds*1000)))
-        mkdir(sprintf('featuresPhone_%d',int32(frameSizeInSeconds*1000)));
+    if 7 ~=exist(sprintf('featuresPhone_lV_%d',int32(frameSizeInSeconds*1000)))
+        mkdir(sprintf('featuresPhone_lV_%d',int32(frameSizeInSeconds*1000)));
     end
 end
 parfor P=1:n
@@ -81,7 +87,7 @@ parfor P=1:n
         [lr,lc] = size(labelVector);
         featureVector(:,end+1:end+lc) = labelVector;
         toSaveFName = sprintf('%d_%d_%d_lV',pids(P),cids(P),sids(P));
-        toSaveFName = strcat(sprintf('featuresPhone_lV_%d',int32(...
+        toSaveFName = strcat(sprintf('featuresPhone_lV_%d/',int32(...
             frameSizeInSeconds*1000),toSaveFName));
     else
         toSaveFname = sprintf('%d_%d_%d_%s',pids(P),cids(P),sids(P),...
