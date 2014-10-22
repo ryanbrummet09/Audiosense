@@ -1,5 +1,6 @@
 function runPipelinePhoneData( fileList, pids, cids, sids, labels, fs, ...
-    mfccCoff, srfLimits, frameSizeInSeconds, numberOfSubbands, wavFiles)
+    mfccCoff, srfLimits, frameSizeInSeconds, numberOfSubbands, wavFiles,...
+    labelTrackStruct)
 %RUNPIPELINEPHONEDATA basic setup of the pipeline for phone data
 %   This function creates the features for the annotated files.
 %   Input:
@@ -37,6 +38,9 @@ n = length(fileList);
 subbands = getLogSubbands(fs, numberOfSubbands);
 if 10 == nargin
     wavFiles = false;
+    labelTrackStruct = struct;
+elseif 11 == nargin
+    labelTrackStruct = struct;
 end
 if wavFiles
     if 7 ~=exist(sprintf('featuresPhone_wav_%d',int32(frameSizeInSeconds*1000)))
@@ -69,8 +73,18 @@ parfor P=1:n
         end
         featureVector(end+1,:) = fv;
     end
-    toSaveFname = sprintf('%d_%d_%d_%s',pids(P),cids(P),sids(P),...
-        labels{P});
+    if ~isempty(fieldnames(labelTrackStruct))
+        labelTimings = labelTrackStruct.labelFileList{P};
+        labelVector = getLabelVectors(assignLabels(labelTimings, ...
+            frameSizeInSeconds,length(data)/fs),...
+            labelTrackStruct.labelOrder,r);
+        [lr,lc] = size(labelVector);
+        featureVector(:,end+1:end+lc) = labelVector;
+        toSaveFName = sprintf('%d_%d_%d_lV',pids(P),cids(P),sids(P));
+    else
+        toSaveFname = sprintf('%d_%d_%d_%s',pids(P),cids(P),sids(P),...
+            labels{P});
+    end
     if wavFiles
         toSaveFname = strcat(sprintf('featuresPhone_wav_%d/',int32(frameSizeInSeconds*1000)),toSaveFname);
     else
