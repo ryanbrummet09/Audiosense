@@ -61,10 +61,10 @@ for P=1:r
     startFrame = -1;
     endFrame = -1;
     for Q=1:length(frameLimits)
-        if frameLimits(Q,1) <= startTime & frameLimits(Q,2) > startTime
+        if frameLimits(Q,1) <= startTime & frameLimits(Q,2) >= startTime
             startFrame = Q;
         end
-        if frameLimits(Q,1) <= endTime & frameLimits(Q,2) > endTime
+        if frameLimits(Q,1) <= endTime & frameLimits(Q,2) >= endTime
             endFrame = Q;
         end
     end
