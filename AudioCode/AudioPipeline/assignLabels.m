@@ -47,6 +47,10 @@ for P=2:length(frameTimes)
     frameLimits(P-1,1) = frameTimes(P-1);
     frameLimits(P-1,2) = frameTimes(P);
 end
+if 0~=mod(audioFileLength,frameLength)
+       frameLimits(end+1,1) = frameLimits(end,2);
+       frameLimits(end,2) = audioFileLength;
+end
 %% get the frames numbers for the label assignments
 [r,c] = size(labelTimings);
 for P=1:r
