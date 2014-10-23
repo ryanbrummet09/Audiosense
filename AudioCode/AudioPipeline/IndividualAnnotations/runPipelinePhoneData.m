@@ -28,8 +28,8 @@ function runPipelinePhoneData( fileList, pids, cids, sids, labels, fs, ...
 %                                           files are wav files
 
 %% add dependencies
-addpath ../;
-addpath ../voicebox/;
+addpath('../');
+addpath('../voicebox/');
 
 %% create parallel workers
 parobject = parpool;
@@ -80,15 +80,15 @@ parfor P=1:n
         featureVector(end+1,:) = fv;
     end
     if ~isempty(fieldnames(labelTrackStruct))
-        labelTimings = labelTrackStruct.labelFileList{P};
+        labelTimings = importLabelFile(labelTrackStruct.labelFileList{P});
         labelVector = getLabelVectors(assignLabels(labelTimings, ...
             frameSizeInSeconds,length(data)/fs),...
             labelTrackStruct.labelOrder,r);
         [lr,lc] = size(labelVector);
         featureVector(:,end+1:end+lc) = labelVector;
-        toSaveFName = sprintf('%d_%d_%d_lV',pids(P),cids(P),sids(P));
-        toSaveFName = strcat(sprintf('featuresPhone_lV_%d/',int32(...
-            frameSizeInSeconds*1000),toSaveFName));
+        toSaveFname = sprintf('%d_%d_%d_lV',pids(P),cids(P),sids(P));
+        toSaveFname = strcat(sprintf('featuresPhone_lV_%d/',int32(...
+            frameSizeInSeconds*1000),toSaveFname));
     else
         toSaveFname = sprintf('%d_%d_%d_%s',pids(P),cids(P),sids(P),...
             labels{P});
