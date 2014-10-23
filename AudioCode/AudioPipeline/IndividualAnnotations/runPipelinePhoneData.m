@@ -32,15 +32,17 @@ addpath('../');
 addpath('../voicebox/');
 
 %% create parallel workers
-parobject = parpool;
+%parobject = parpool;
 %% read audio file
-n = length(fileList);
+%n = length(fileList);
 subbands = getLogSubbands(fs, numberOfSubbands);
 if 10 == nargin
     wavFiles = false;
     labelTrackStruct = struct;
+    labelFlag = false;
 elseif 11 == nargin
     labelTrackStruct = struct;
+    labelFlag = false;
 end
 if isempty(fieldnames(labelTrackStruct))
     if wavFiles
@@ -56,8 +58,11 @@ else
     if 7 ~=exist(sprintf('featuresPhone_lV_%d',int32(frameSizeInSeconds*1000)))
         mkdir(sprintf('featuresPhone_lV_%d',int32(frameSizeInSeconds*1000)));
     end
+    labelFileList = labelTrackStruct.labelFileList;
+    labelOrder = labelTrackStruct.labelOrder;
+    labelFlag = true;
 end
-parfor P=1:n
+for P=1:length(fileList)
     fname = fileList{P};
     disp(fname);
     if wavFiles
@@ -65,8 +70,8 @@ parfor P=1:n
     else
         data = getSoundData(fname);
     end
-    [bz,bp,frames] = framing(data,fs,frameSizeInSeconds);
-    [r,c] = size(frames);
+    [~,~,frames] = framing(data,fs,frameSizeInSeconds);
+    [r,~] = size(frames);
     featureVector = [];
     lastSpectralAmp = [];
     for Q=1:r
@@ -79,16 +84,16 @@ parfor P=1:n
         end
         featureVector(end+1,:) = fv;
     end
-    if ~isempty(fieldnames(labelTrackStruct))
-        labelTimings = importLabelFile(labelTrackStruct.labelFileList{P});
-        labelVector = getLabelVectors(assignLabels(labelTimings, ...
-            frameSizeInSeconds,length(data)/fs),...
-            labelTrackStruct.labelOrder,r);
-        [lr,lc] = size(labelVector);
+    if labelFlag
+        labelTimings = importLabelFile(labelFileList{P});
+        labelAssign = assignLabels(labelTimings, ...
+            frameSizeInSeconds,ceil(length(data)/fs));
+        labelVector = getLabelVectors(labelAssign,labelOrder,r);
+        [~,lc] = size(labelVector);
         featureVector(:,end+1:end+lc) = labelVector;
         toSaveFname = sprintf('%d_%d_%d_lV',pids(P),cids(P),sids(P));
         toSaveFname = strcat(sprintf('featuresPhone_lV_%d/',int32(...
-            frameSizeInSeconds*1000),toSaveFname));
+            frameSizeInSeconds*1000)),toSaveFname);
     else
         toSaveFname = sprintf('%d_%d_%d_%s',pids(P),cids(P),sids(P),...
             labels{P});
@@ -101,6 +106,6 @@ parfor P=1:n
     parSaveVariable(toSaveFname,featureVector);
 end
 %% close parallel workers
-delete(parobject);
+%delete(parobject);
 end
 
