@@ -64,7 +64,8 @@ else
 end
 for P=1:length(fileList)
     fname = fileList{P};
-    disp(fname);
+    disp(sprintf('%d/%d Working with %s, for fs=%d ms',P,...
+        length(fileList),fname,int32(frameSizeInSeconds*1000)));
     if wavFiles
         data = getSoundData(fname,wavFiles);
     else
