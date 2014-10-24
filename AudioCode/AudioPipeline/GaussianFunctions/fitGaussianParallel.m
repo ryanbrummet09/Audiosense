@@ -1,5 +1,5 @@
 function fitGaussianParallel( trainingSet, startAt, ...
-                            endAt, toSaveAt, toSaveTag )
+                            endAt, toSaveTag, toSaveAt )
 %FITGAUSSIANPARALLEL fits gaussians in parallel
 %   Input:
 %           trainingSet         :           the set on which the gaussians
@@ -14,12 +14,18 @@ function fitGaussianParallel( trainingSet, startAt, ...
 %                                           of course, less than startAt
 %           toSaveTag           :           an optional parameter to put in
 %                                           the saved variable name
+%           toSaveAt            :           optional parameter, indicates
+%                                           location at which to save the
+%                                           GMM Object
 %   Values are stored in the dataVariables folder
+customSaveFlag = true;
 if 3 == nargin
     toSaveTag = '';
     toSaveAt = '';
+    customSaveFlag = false;
 elseif 4 == nargin
-    toSaveTag = '';
+    toSaveAt = '';
+    customSaveFlag = false;
 end
 if endAt < startAt
     error('GaussianFunctions:parallel','endsAt < startsAt');
@@ -32,12 +38,12 @@ end
 parfor P=startAt:endAt
     disp(sprintf('Fitting %d gaussians',pow2(P)));
     GMMObject = fitGaussianDistribution(trainingSet(:,5:end),pow2(P));
-    if 3 >= nargin | (4 == nargin & strcmp('',toSaveAt))
+    if ~customSaveFlag
         parSaveVariable(sprintf('dataVariables/GMMObj_%s%d',toSaveTag,...
             pow2(P)),GMMObject);
     else
-        parSaveVariable(sprintf('%s/GMMObj_%s%d',toSaveTag,pow2(P),...
-            GMMObject));
+        parSaveVariable(sprintf('%s/GMMObj_%s%d',toSaveAt,toSaveTag,...
+                        pow2(P)),GMMObject);
     end
 end
 delete(parObject);
