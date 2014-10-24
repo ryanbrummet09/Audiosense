@@ -37,7 +37,7 @@ for P=1:length(fileList)
             continue;
         end
         [r,c] = size(fileFeatures);
-        temp = zeros(r,c+4);
+        temp = zeros(r,c+4-numberToNotInclude);
         temp(:,1) = pid;
         temp(:,2) = cid;
         temp(:,3) = sid;
