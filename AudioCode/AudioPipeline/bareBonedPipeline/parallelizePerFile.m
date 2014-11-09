@@ -10,8 +10,8 @@ parfor P=1:length(fileList)
     if isempty(featureVector)
         continue;
     end
-    [p,c,s] = getInfo(fileList{P});
-    fname = strcat('fileFeatures/fv_',num2str(p),'_',num2str(c),'_',num2str(s));
+    [p,c,s,d] = getInfo(fileList{P});
+    fname = strcat('fileFeatures/fv_',num2str(p),'_',num2str(c),'_',num2str(s),'_',d);
     saveV(featureVector,fname);
 end
 matlabpool close;
