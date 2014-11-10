@@ -1,4 +1,5 @@
-function [ featureVector ] = perFilePipeline( mfccCoff, frequency, fileName )
+function [ featureVector ] = perFilePipeline( mfccCoff, frequency, ...
+                                                frameSize, fileName )
 %PERFILEPIPELINE A bare-boned implementation of the audio pipeline
 % Input:
 %           mfccCoff        :       Number of MFCCs excluding the 1st
@@ -25,7 +26,7 @@ addpath ../;
 % files out. This also returns the number of rows we would need for the
 % audio files. This helps in optimizing the code.
 
-[fname,removedFiles, numberOfRows] = sanityCheck(fileName,frequency,0.02,true);
+[fname,removedFiles, numberOfRows] = sanityCheck(fileName,frequency,frameSize,true);
 if 0 < length(removedFiles)
     disp('File does not contain data');
     return;
@@ -59,7 +60,7 @@ end
 %     any buzzes or beeps. The audio is also broken up into frames of 20ms
 %     each. The windowing used is rectangular.
 try
-    [buzzMask, beepMask, frames] = framing(audioSignal,frequency,0.02, locs_buzz, locs_beep);
+    [buzzMask, beepMask, frames] = framing(audioSignal,frequency,frameSize, locs_buzz, locs_beep);
 catch err
     errmsg = sprintf('Framing error for file %s, skipping file',tt);
     disp(errmsg);
