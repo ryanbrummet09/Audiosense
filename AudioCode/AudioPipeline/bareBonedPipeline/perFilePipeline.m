@@ -94,9 +94,9 @@ for Q=1:length(frames)
         featureVector(K,:) = extractFrameFeatures(frames(Q,:),f,frequency,mfccCoff,LowEnergyMask(Q),buzzMask(Q),beepMask(Q));
         K = K+1;
     catch err
-        errmsg = sprintf('Feature error for file %s in frame %d, skipping frame',tt,Q);
-        disp(errmsg);
-        err
+        %errmsg = sprintf('Feature error for file %s in frame %d, skipping frame',tt,Q);
+        %disp(errmsg);
+        %err
         continue;
     end
 end
