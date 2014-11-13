@@ -6,7 +6,7 @@ matlabpool open;
 parfor P=1:length(fileList)
     s = sprintf('Looking at %s, \nIndex:%d',fileList{P},P);
     disp(s);
-    featureVector = perFilePipeline(12,16000,fileList{P});
+    featureVector = perFilePipeline(12,16000,0.064,fileList{P});
     if isempty(featureVector)
         continue;
     end

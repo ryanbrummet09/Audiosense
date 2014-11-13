@@ -29,6 +29,7 @@ addpath ../;
 [fname,removedFiles, numberOfRows] = sanityCheck(fileName,frequency,frameSize,true);
 if 0 < length(removedFiles)
     disp('File does not contain data');
+    featureVector = [];
     return;
 end
 
