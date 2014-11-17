@@ -1,0 +1,14 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Audiosense Design}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Field Study}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Software Implementation}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Calibration}{section.2}% 5
+\BOOKMARK [3][-]{subsubsection.2.3.1}{Frequency Response}{subsection.2.3}% 6
+\BOOKMARK [3][-]{subsubsection.2.3.2}{Directionality}{subsection.2.3}% 7
+\BOOKMARK [1][-]{section.3}{Context Recognition}{}% 8
+\BOOKMARK [2][-]{subsection.3.1}{Context Prevalence}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.2}{Feature Selection}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.3}{Classification and Results}{section.3}% 11
+\BOOKMARK [1][-]{section.4}{Related Work}{}% 12
+\BOOKMARK [1][-]{section.5}{Conclusion}{}% 13
+\BOOKMARK [1][-]{section*.3}{References}{}% 14
