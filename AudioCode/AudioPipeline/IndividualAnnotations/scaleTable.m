@@ -1,9 +1,13 @@
-function [ featureTable ] = scaleTable( featureTable )
+function [ featureTable ] = scaleTable( featureTable, extraInformation )
 %SCALETABLE Scales the table between 0 and 1
 %   Detailed explanation goes here
 varNames = featureTable.Properties.VariableNames;
 n = length(varNames);
-for P=4:n-1
+if 1 == nargin
+    extraInformation.numberOfLabels = 1;
+    extraInformation.toStartLookingFrom = 4;
+end
+for P=extraInformation.toStartLookingFrom:n-extraInformation.numberOfLabels;
     varN = varNames{P};
     val = eval(sprintf('featureTable.%s;',varN));
     ninf = find(~isinf(val) & ~isnan(val));
