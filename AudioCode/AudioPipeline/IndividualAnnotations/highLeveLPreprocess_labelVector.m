@@ -46,7 +46,7 @@ fname = fileStruct.filename;
 actualFName = strsplit(fname,'/');
 actualFName = actualFName{end};
 actualFName = strsplit(actualFName,'.');
-actualFName = actualFName{end};
+actualFName = actualFName{1};
 actualFName = strsplit(actualFName,'_');
 disp(sprintf('Working with %s',fname));
 fdata = load(fname);
