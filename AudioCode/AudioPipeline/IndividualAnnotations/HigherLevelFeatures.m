@@ -41,12 +41,12 @@ if isfield(dataStruct,'extras')
         end
         if length(SRFs) > 0
             for P=1:length(SRFs)
-                dataFeatures{end+1} = sprintf('srf%.2f',SRFs(P));
+                dataFeatures{end+1} = sprintf('srf%d',int32(SRFs(P)*100));
             end
         end
-        dataFeatures{end+1} = {'sflux'};
-        dataFeatures{end+1} = {'scentroid'};
-        dataFeatures{end+1} = {'sentropy'};
+        dataFeatures{end+1} = 'sflux';
+        dataFeatures{end+1} = 'scentroid';
+        dataFeatures{end+1} = 'sentropy';
         if noOfSBP > 0
             for P=0:noOfSBP-1
                 dataFeatures{end+1} = sprintf('sbp%d',P);
