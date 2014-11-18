@@ -48,7 +48,8 @@ actualFName = actualFName{end};
 actualFName = strsplit(actualFName,'.');
 actualFName = actualFName{1};
 actualFName = strsplit(actualFName,'_');
-disp(sprintf('Working with %s',fname));
+disp(sprintf('Working with %s, fL:%f, wL:%f',fname,...
+                fileStruct.frameLength,fileStruct.windowLength));
 fdata = load(fname);
 fdata = fdata.var;
 if  isempty(fdata)
