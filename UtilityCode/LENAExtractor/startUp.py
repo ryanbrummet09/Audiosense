@@ -24,6 +24,9 @@ def main():
 	lenaFileList = getFileList(lenaFileFolder,'wav');
 	# get the patient details, then corresponding trs and wav files
 	for surveyFile in surveyFileList:
+		if 0 == os.stat(surveyFile).st_size:
+			print 'Survey file:',surveyFile,' is empty. Skipping\n';
+			continue;
 		surveyDeets = getSurveyFileDetails(surveyFile.split('/')[-1]);
 		pid = surveyDeets[0];
 		if 1 == len(pid):
