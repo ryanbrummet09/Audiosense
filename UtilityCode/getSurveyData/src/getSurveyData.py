@@ -66,19 +66,21 @@ def main():
             tagVals[tV[0]] = tV[1];
         corrGPS = getCorrespondingFile(surveyFile,gpsFiles);
         if 0 != len(corrGPS):
-            f = open(corrGPS[0],'r');
-            gt = f.read();
-            f.close();
-            if '' == gt:
-                continue;
-            gt = gt.split('\n');
-            try:
-                gt.remove(' ');
-            except ValueError:
-                logging.info('gps ValueError');
-            tt = gt[0].split(',');
-            tagVals['lat'] = tt[1];
-            tagVals['lon'] = tt[0];
+            if 0 == os.path.getsize(corrGPS[0]):
+                tagVals['lat'] = '';
+                tagVals['lon'] = '';
+            else:
+                f = open(corrGPS[0],'r');
+                gt = f.read();
+                f.close();
+                gt = gt.split('\n');
+                try:
+                    gt.remove(' ');
+                except ValueError:
+                    logging.info('gps ValueError');
+                tt = gt[0].split(',');
+                tagVals['lat'] = tt[1];
+                tagVals['lon'] = tt[0];
         cond = surveyFile.split('/')[-1].split('.')[1];
         tagVals['condition'] = cond;
         tagVals['surveyPath'] = surveyFile;
