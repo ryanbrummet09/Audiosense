@@ -73,14 +73,18 @@ def main():
                 f = open(corrGPS[0],'r');
                 gt = f.read();
                 f.close();
-                gt = gt.split('\n');
-                try:
-                    gt.remove(' ');
-                except ValueError:
-                    logging.info('gps ValueError');
-                tt = gt[0].split(',');
-                tagVals['lat'] = tt[1];
-                tagVals['lon'] = tt[0];
+                if '' == gt:
+                    tagVals['lat'] = '';
+                    tagVals['lon'] = '';
+                else:
+                    gt = gt.split('\n');
+                    try:
+                        gt.remove(' ');
+                    except ValueError:
+                        logging.info('gps ValueError');
+                    tt = gt[0].split(',');
+                    tagVals['lat'] = tt[1];
+                    tagVals['lon'] = tt[0];
         cond = surveyFile.split('/')[-1].split('.')[1];
         tagVals['condition'] = cond;
         tagVals['surveyPath'] = surveyFile;
