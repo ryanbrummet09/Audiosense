@@ -10,7 +10,7 @@ for P=1:c
     infidx = find(isinf(temp));
     toKeep(nanidx) = false;
     toKeep(infidx) = false;
-    opArray(1,P) = mean(temp);
+    opArray(1,P) = mean(temp(toKeep));
 end
 
 end
