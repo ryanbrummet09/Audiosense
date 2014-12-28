@@ -2,7 +2,9 @@ function [ accMat, bestMeasures ] = learnBestModel( ipStructure, ...
                                     outcomeMeasure, cRange, epRange, k)
 %LEARNBESTMODEL give the configuration that yields the lowest mse
 %   Detailed explanation goes here
-
+if 4 == nargin
+    k = 5;
+end
 
 bestMeasures = struct;
 bestMeasures.mse = inf;
