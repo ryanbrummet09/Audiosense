@@ -10,6 +10,7 @@ bestMeasures = struct;
 bestMeasures.mse = inf;
 bestMeasures.c = -1;
 bestMeasures.e = -1;
+bestMeasures.k = -1;
 accMat = zeros(length(cRange), length(epRange), k);
 addpath ../;
 addpath ./libsvm-3.20/matlab/;
@@ -38,6 +39,7 @@ for P=1:k
         bestMeasures.mse = mV;
         bestMeasures.c = cRange(rm);
         bestMeasures.e = epRange(cm);
+        bestMeasures.k = P;
     end
 end
 %delete(parObj);
