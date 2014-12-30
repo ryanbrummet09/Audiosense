@@ -13,6 +13,7 @@ firstTime = true;
 addpath ../;
 addpath ./libsvm-3.20/matlab/;
 for P=1:k
+    disp(sprintf('fold %d',P));
     eval(sprintf('pD = ipStructure.%s.partition.dummyEncMapping.patient;',outcomeMeasure));
     eval(sprintf('cD = ipStructure.%s.partition.dummyEncMapping.condition;',outcomeMeasure));
     eval(sprintf('trainingTable = ipStructure.%s.partition.folds.fold%d.trainingSet;',outcomeMeasure, P));
@@ -25,10 +26,10 @@ for P=1:k
         for R = 1:length(gRange)
             for S = 1:length(epRange)
                 model = svmtrain(label_train, feature_train, ...
-                sprintf('-s 3 -t 2 -c %f -g %f -p %f -h 0',cRange(Q), ...
+                sprintf('-s 3 -t 2 -c %f -g %f -p %f -h 0 -q',cRange(Q), ...
                 gRange(R), epRange(S)));
                 [~, acc, ~] = svmpredict(label_valid, feature_valid, model);
-                temp = [P Q R S acc(2)];
+                temp = [P cRange(Q) gRange(R) epRange(S) acc(2)];
                 if firstTime
                     accTable = array2table(temp);
                     accTable.Properties.VariableNames = {'fold','c',...
