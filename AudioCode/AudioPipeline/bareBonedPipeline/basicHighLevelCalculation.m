@@ -15,7 +15,7 @@ parfor P=1:r
     disp(sprintf('Working with: %s',fileList{P}));
     loadedVar = parLoadVariable(fileList{P});
     loadedVar = loadedVar.var;
-    summarizedFeatures = feval(highLevelHandle, loadedVar(:,4:c-3));
+    summarizedFeatures = robustStat(loadedVar(:,4:c-3), highLevelHandle);
     fname = fileList{P};
     fname = strsplit(fname,'/');
     fname = fname{end};
