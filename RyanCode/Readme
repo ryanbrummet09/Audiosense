@@ -1,0 +1,8 @@
+SurveyCode directory contains code related to training model to predict
+	responses using survey predictors
+
+AudioCode directory contains code related to training model to predict 
+	responses using audio predictors
+
+processing directory contains code related to extracting predictors and 
+	creating training and testing sets
