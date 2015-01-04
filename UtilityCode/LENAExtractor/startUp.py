@@ -19,9 +19,11 @@ def main():
 	surveyFolder = sys.argv[1];
 	transcriberFolder = sys.argv[2];
 	lenaFileFolder = sys.argv[3];
+	secondsToLookAround = int(sys.argv[4]);
 	surveyFileList = getFileList(surveyFolder,'survey');
 	transcriberFileList = getFileList(transcriberFolder,'trs');
 	lenaFileList = getFileList(lenaFileFolder,'wav');
+	fChunkSurvey = open('surveyChunk.csv','w');
 	# get the patient details, then corresponding trs and wav files
 	for surveyFile in surveyFileList:
 		if 0 == os.stat(surveyFile).st_size:
@@ -49,7 +51,12 @@ def main():
 			print fnameTemplate;
 			continue;
 		print 'Working with '+surveyFile.split('/')[-1];
-		extA.extractAudio(correspondingLENAFile[0], surveyFile, correspondingTrsFile[0]);
-		print 'data extracted and saved';
+		ret = extA.extractAudio(correspondingLENAFile[0], surveyFile, correspondingTrsFile[0], secondsToLookAround);
+		if 1 == ret:
+			print 'data extracted and saved';
+			patDeets = extA.getFileDetails(surveyFile);
+			tW = surveyFile+','+'Chunks/'+patDeets[0]+'_'+patDeets[1]+'_'+patDeets[2]+'.wav';
+			fChunkSurvey.write(tW+'\n');
+	fChunkSurvey.close();
 if __name__ == "__main__":
 	main();

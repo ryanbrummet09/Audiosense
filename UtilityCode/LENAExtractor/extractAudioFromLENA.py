@@ -41,7 +41,7 @@ def extractAudio(wavFilePath, surveyFilePath, trsFilePath, secondsToLookBack=300
 	#waveParams[3] = totalNumberOfSamples;
 	if int(sampleToStartAt) > int(waveParams[3]):
 		print 'LENA does not cover the survey for:'+patientDetails[0]+','+patientDetails[1]+','+patientDetails[2];
-		return;
+		return 0;
 	elif int(sampleToStartAt)< 0:
 		sampleToStartAt = 0;
 	#print '\033[94m total:'+str(waveParams[3])+', starting at:'+str(sampleToStartAt)+'\033[93m';
@@ -54,5 +54,6 @@ def extractAudio(wavFilePath, surveyFilePath, trsFilePath, secondsToLookBack=300
 	waveObject.setparams(newWaveParams);
 	waveObject.writeframes(toWrite);
 	waveObject.close();
+	return 1;
 if __name__ == "__main__":
 	extractAudio(sys.argv[1],sys.argv[2],sys.argv[3],int(sys.argv[4]));
