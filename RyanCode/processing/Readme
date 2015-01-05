@@ -1,1 +1,13 @@
-Info to run here
+extractSurveyDataFromDataPairs.m: pulls data out of all .survey files and stores
+	the results in a table.  Must run getSurveyDatCorrToAudioDat.m first.
+
+findSamplesMeetingDurationReq.m: Deprecated.  still used to find unix timestamp
+
+getSurveyDatCorrToAudioDat.m: aligns .survey and .audio files.  Notice that
+	this script does not handle the duplicate .survey issue.  This issue
+	must be handled by "hand" or another script written.
+
+getUnixTime.m: called by findSamplesMeetingDurationReq.m
+
+removeNonQualUsers.m: removes samples of all users not having a certain number
+	of samples.
