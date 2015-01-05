@@ -6,3 +6,7 @@ AudioCode directory contains code related to training model to predict
 
 processing directory contains code related to extracting predictors and 
 	creating training and testing sets
+
+THE SEEDS FOR THE INNER AND OUT CROSS VALIDATION SETS IS ALWAYS TO BE 100.
+THIS IS ASSUMING THAT THE DATASETS PROVIDED ON TORO ARE USED. OTHERWISE THE 
+SEED USED FOR INNER AND OUTER CROSS VALIDATION DO NOT MATTER.
