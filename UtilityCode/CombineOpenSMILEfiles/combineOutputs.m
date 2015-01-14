@@ -9,7 +9,12 @@ function [ combinedTable ] = combineOutputs( fileList )
 combinedTable = table;
 
 for P=1:length(fileList)
-    tempTable = importOpenSmileOutput(fileList{P});
+    try
+        tempTable = importOpenSmileOutput(fileList{P});
+    catch err
+        disp(sprintf('There was an error for (%d) %s, Skipping',...
+            P,fileList{P}));
+        continue;
     combinedTable = [combinedTable; tempTable];
 end
 
