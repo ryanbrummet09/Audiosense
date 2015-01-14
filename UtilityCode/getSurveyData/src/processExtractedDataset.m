@@ -18,6 +18,8 @@ toCheckDN = '2014-01-30';
 toCheckDN = datenum(toCheckDN, 'yyyy-mm-dd');
 afterNewApp = dns > toCheckDN;
 ipDataset.afterNewApp = afterNewApp;
+dns = getDatenums(ipDataset.audioPath, true);
+ipDataset.audioDatenums = dns;
 
 end
 
