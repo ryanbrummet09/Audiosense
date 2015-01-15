@@ -11,11 +11,12 @@ combinedTable = table;
 for P=1:length(fileList)
     try
         tempTable = importOpenSmileOutput(fileList{P});
+        combinedTable = [combinedTable; tempTable];
     catch err
         disp(sprintf('There was an error for (%d) %s, Skipping',...
             P,fileList{P}));
         continue;
-    combinedTable = [combinedTable; tempTable];
+    end
 end
 
 end
