@@ -3,6 +3,11 @@ function [ ipDataset ] = processExtractedDataset( ipDataset )
 %   Input/Output:
 %           ipDataset : dataset extracted from python script
 
+%% remove users who have withdrawn
+withdrawnUsers = [17, 23, 30, 49];
+for P=1:length(withdrawnUsers)
+    ipDataset = ipDataset(ipDataset~=withdrawnUsers(P),:);
+end
 %% put the correct session value
 session = sessionSurvey(ipDataset.session, ipDataset.survey);
 ipDataset.session = session;
