@@ -1,0 +1,25 @@
+To run you must have the CATSTRUCT library.  You can find it at 
+http://www.mathworks.com/matlabcentral/fileexchange/7842-catstruct.
+
+Each of the included functions have detailed comments explaining their
+use so this Readme exists to explain what each function does, not how 
+to use them.
+
+use shabihPatchFunc to create preprocessed datasets for each response.
+This function assumes that you have already extracted the data with 
+Shabih's script.
+
+removeNonQualUsers is used by shabihPatchFunc and thus should not be
+individually used.
+
+use SVMFunc to create SVM models for the given response with cross
+validation.  NOTICE THAT SVMfunc WILL USE ALL PREDICTORS IN DATASETS
+THAT ARE PASSED TO IT.  IF YOU WISH TO INCLUDE ONLY CERTAIN PREDICTORS
+YOU MUST DO ADDITIONAL PROCESSING TO REMOVE THEM.  This is as simple as
+removing relevent columns from the datasets produced by shabihPatchFunc.
+
+produceIndvSets is used to extract the relevent folds that are created
+when SVMFunc is used (duplicates the statification done by SVMFunc).
+
+The example scripts exist to show how one might use shabihPatchFunc
+and SVMFunc. 
