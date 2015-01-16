@@ -9,6 +9,10 @@
 % run the catstruct library is needed.  You may find the library at
 % http://www.mathworks.com/matlabcentral/fileexchange/7842-catstruct
 %
+% NOTICE THAT THIS FUNCTION ASSUMES THAT THE ONLY CATEGORICAL VARIABLES
+% THAT WILL EVER BE PASSED TO AT WILL BE MEMBERS OF THE SET [patient,
+% condition, ac, lc, tf, tl, vc, cp, rs, nz, nl]
+%
 % Params: 
 %    struct: inputStruct
 %       fields: 
@@ -50,7 +54,8 @@
 %           int: cost - optimal cost values for each fold
 %           int: gamma - optimal gamma values for each fold
 %           int: seed - seed value used
-%           table: targetData - dataset used to train and test model
+%           table: dataTable - table used to train and test model after bad
+%                              predictors have been removed.
 %           int: degree - degree used for SVM
 %           int: kernal - SVM kernal using libSVM syntax
 %           cell array: groupVars - gives predictors used to stratify folds
@@ -60,6 +65,9 @@
 %                                    cost
 %           int: crossValFolds - gives the number of inner/outer cross
 %                                validation folds
+%           cell array: badPredNames - gives the names of predictors that
+%                                      were removed from the table passed
+%                                      to SVMFunc
 %   struct: mdlStruct
 %       fields:
 %           libSVM model: mdl# - gives the model found for each outer fold 
@@ -69,6 +77,9 @@
 %                           set for each fold
 
 function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
+
+    surveyPreds = {'patient','condition','ac','lc','tf','tl','vc','cp','rs','nz','nl'};
+    posResponses = {'sp','le','ld','ld2','lcl','ap','qol','im','st'};
 
     % handle present and missing field values
     if isfield(inputStruct,'libSVMLibLocation');
@@ -88,6 +99,11 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     end
     if isfield(inputStruct,'dataLocation')
         load(inputStruct.dataLocation);
+        temp = dataTable(:,end);
+        temp = temp.Properties.VariableNames;
+        if ~ismember(temp{1},posResponses)
+            error('The last column of the table that you pass to SVMFunc must be either sp, le, ld, ld2, lcl, ap, qol, im, or st'); 
+        end
     else
         error('You must provided the location of the data you wish to use'); 
     end
@@ -180,33 +196,78 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     outerCV = cvpartition(dataTable.cvVar,'kfold',crossValFolds);
     dataTable.cvVar = [];
     
+    disp('Finding and Removing Bad predictors');
+    
+    targetData = table2array(dataTable);
+    tableNames = dataTable.Properties.VariableNames;
+    index = 1;
+    for outerFolds = 1 : crossValFolds
+        trainingSet = targetData(training(outerCV,outerFolds),:);
+
+        temp = dataTable(training(outerCV,outerFolds),:);
+        cvVar = zeros(size(temp,1),1);
+        for cs = 0 : size(groupVars,2) - 1
+            if strcmp(char(groupVars{cs + 1}),'patient') || strcmp(char(groupVars{cs + 1}),'condition')
+                if strcmp(char(groupVars{cs + 1}),'patient')
+                    cvVar = cvVar + temp.patient;
+                else
+                    cvVar = cvVar + temp.(groupVars{cs + 1}) * 10 ^ (-cs - 1);
+                end
+            else
+                cvVar = cvVar + temp.(groupVars{cs + 1}) * 10 ^ (-cs);
+            end
+        end
+        temp.cvVar = cvVar;
+        innerCV = cvpartition(temp.cvVar,'kfold',crossValFolds);
+        temp.cvVar = [];
+        
+        for innerFolds = 1 : crossValFolds
+            innerTraining = trainingSet(training(innerCV,innerFolds),:);
+            
+            for k = 1 : size(targetData,2) - 1
+                if ~ismember(tableNames{k},surveyPreds)
+                    minimum = nanmin(innerTraining(:,k));
+                    maximum = nanmax(innerTraining(:,k));
+                    if minimum == maximum
+                        toRemove(index) = k;
+                        index = index + 1;
+                    end
+                end
+            end
+        end
+    end
+    if exist('toRemove','var')
+        toRemove = unique(toRemove);
+        badPredTable = dataTable(:,toRemove);
+        dataTable(:,toRemove) = [];
+    end
+    
     tableNames = dataTable.Properties.VariableNames;
     
     % dummy encode survey preds
     zeroPreds = {'tf','tl','vc','cp','rs','nl','condition'};
-    allPreds = {'patient','condition','ac','lc','tf','tl','vc','cp','rs','nz','nl'};
-    for k = 1 : size(allPreds,2)
-        if ismember(allPreds{k},tableNames)
+    for k = 1 : size(surveyPreds,2)
+        if ismember(surveyPreds{k},tableNames)
             if k == 1
-                if ismember(allPreds{k},zeroPreds)
-                    dummyVars = dummyvar(dataTable.(allPreds{k}) + 1);
+                if ismember(surveyPreds{k},zeroPreds)
+                    dummyVars = dummyvar(dataTable.(surveyPreds{k}) + 1);
                     dummyVars = dummyVars(:,2:end);
                 else
-                    dummyVars = dummyvar(dataTable.(allPreds{k}));
+                    dummyVars = dummyvar(dataTable.(surveyPreds{k}));
                 end
             else
-                if ismember(allPreds{k},zeroPreds)
-                    temp = dummyvar(dataTable.(allPreds{k}) + 1);
+                if ismember(surveyPreds{k},zeroPreds)
+                    temp = dummyvar(dataTable.(surveyPreds{k}) + 1);
                     dummyVars = [dummyVars,temp(:,2:end)];
                 else
-                    dummyVars = [dummyVars,dummyvar(dataTable.(allPreds{k}))];
+                    dummyVars = [dummyVars,dummyvar(dataTable.(surveyPreds{k}))];
                 end
             end
         end
     end
     dummyVars(:,sum(dummyVars,1) == 0) = [];
     dataTableTemp = dataTable;
-    dataTableTemp(:,allPreds) = [];
+    dataTableTemp(:,surveyPreds) = [];
     targetData = [dummyVars, table2array(dataTableTemp)];
     
     disp('Finding Opt Params for outer folds');
@@ -356,13 +417,14 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     SVMSettings.cost = cost;
     SVMSettings.gamma = gamma;
     SVMSettings.seed = seed;
-    SVMSettings.targetData = targetData;
+    SVMSettings.dataTable = dataTable;
     SVMSettings.degree = degree;
     SVMSettings.kernal = kernal;
     SVMSettings.groupVars = groupVars;
     SVMSettings.startGammaValues = startGammaValues;
     SVMSettings.startCostValues = startCostValues;
     SVMSettings.crossValFolds = crossValFolds;
+    SVMSettings.badPredNames = badPredTable.Properties.VariableNames;
     
     if saveResults
         save(strcat(saveLocation,response{1}),'SVMSettings','mdlStruct','absErrorStruct'); 
