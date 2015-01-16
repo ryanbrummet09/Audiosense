@@ -16,4 +16,4 @@ inputStruct.startGammaValues = [.000001,.00001,.0001,.001,.01,.1,1,10,100,1000,1
 inputStruct.startCostValues = [.000001,.00001,.0001,.001,.01,.1,1,10,100,1000,10000,50000,100000,500000];
 inputStruct.allowGridSearchEdgeVals = true;
 
-[ SVMSettings, absError ] = SVMFunc( inputStruct );
+[ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct );
