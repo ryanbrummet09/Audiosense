@@ -20,8 +20,8 @@ for P=1:length(fileList)
     if toExtract <= length(data)
         data = data(1:toExtract);
     end
-    [p,c,s] = getInfo(fileList{P});
-    toWriteTo = sprintf('%s/%d_%d_%d.audio',pathToSave,p,c,s);
+    [p,c,s,d] = getInfo(fileList{P});
+    toWriteTo = sprintf('%s/%d_%d_%d_%f.audio',pathToSave,p,c,s,d);
     f = fopen(toWriteTo,'w');
     fwrite(f,data,'short',0,'l');
     fclose(f);

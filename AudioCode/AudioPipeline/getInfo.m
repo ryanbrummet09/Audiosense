@@ -11,7 +11,6 @@ pid = str2num(t{end});
 cid = str2num(contents{2});
 sid = str2num(contents{3});
 fdate = contents{4};
-fdate = strsplit(fdate,' ');
-fdate = fdate{1};
+fdate = datenum(fdate, 'yyyy-mm-dd HH-MM-SS');
 end
 
