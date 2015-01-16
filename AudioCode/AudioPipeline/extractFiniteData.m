@@ -24,8 +24,8 @@ end
 if 4 == nargin
     extractDatenum = false;
 end
-
-for P=1:length(fileList)
+parObj = parpool;
+parfor P=1:length(fileList)
     data = getSoundData(fileList{P});
     if toExtract <= length(data)
         data = data(1:toExtract);
@@ -41,6 +41,8 @@ for P=1:length(fileList)
     fclose(f);
     disp(sprintf('Written %s',toWriteTo));
 end
+
+delete(parObj);
 
 end
 
