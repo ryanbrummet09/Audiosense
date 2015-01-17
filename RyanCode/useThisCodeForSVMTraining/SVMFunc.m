@@ -56,6 +56,9 @@
 %           int: seed - seed value used
 %           table: dataTable - table used to train and test model after bad
 %                              predictors have been removed.
+%           array: targetData - dummy encoded version of dataTable.  Each
+%                               column corresponds to minimums and maximums
+%                               fields of the mdlStruct struct returned
 %           int: degree - degree used for SVM
 %           int: kernal - SVM kernal using libSVM syntax
 %           cell array: groupVars - gives predictors used to stratify folds
@@ -71,10 +74,14 @@
 %   struct: mdlStruct
 %       fields:
 %           libSVM model: mdl# - gives the model found for each outer fold 
+%           array: minimums# - gives the minimum value of each numerical
+%                              predictor that was used for scalings
+%           array: maximums# - gives the maximum value of each numerical
+%                              predictor that was used for scalings
 %   struct: absErrorStruct
 %       fields:
 %           array: error# - gives the abs error for each sample of the test
-%                           set for each fold
+%                           set for each outer fold
 
 function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
 
@@ -114,8 +121,9 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     end
     myCluster = parcluster('local');
     if isfield(inputStruct,'numCores')
-        myCluster.NumWorkers = inputStruct.numCores;
-        parpool(myCluster,inputStruct.numCores); 
+        numCores = inputStruct.numCores;
+        myCluster.NumWorkers = numCores;
+        parpool(myCluster,numCores); 
     else
         myCluster.NumWorkers = 1;
         parpool(myCluster,1);
@@ -171,13 +179,23 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     else
         kernal = 2; 
     end
+    
+    % get information used to find optimal place for parallelization
+    innerParFor = ((ceil(size(startGammaValues,2) / numCores) * size(startCostValues,2)) + (ceil(5 / numCores) * 5 * (maxIterCount - 1))) * (crossValFolds * crossValFolds);
+    outerParFor = ((size(startGammaValues,2) * size(startCostValues,2)) + (5 * 5 * (maxIterCount - 1))) * (ceil(crossValFolds / numCores) * crossValFolds);
+    
     disp(strcat('Optimal SVM grid params will now be found for:',{' '},response));
     disp(strcat('Max grid search iterations:',{' '},num2str(maxIterCount)));
     disp(strcat('Outer/Inner cross validation folds:',{' '},num2str(crossValFolds)));
     disp(strcat('Degree:',{' '},num2str(degree)));
     disp(strcat('Kernal:',{' '},num2str(kernal)));
+    if outerParFor <= innerParFor
+        disp({'Using outer parallelization'}); 
+    else
+        disp({'Using inner parallelization'});
+    end
     
-    disp('Preprocessing');
+    disp('Beginning Preprocessing');
     
    % build testing folds for outer cross validation
     cvVar = zeros(size(dataTable,1),1);
@@ -277,116 +295,263 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     
     mdlStruct = struct;
     absErrorStruct = struct;
-    parfor outerFolds = 1 : crossValFolds
-        disp(strcat('Outer Fold',{' '},num2str(outerFolds)));
-        trainingSet = targetData(training(outerCV,outerFolds),:);
-        testingSet = targetData(test(outerCV,outerFolds),:);
+    
+    if outerParFor <= innerParFor
+        parfor outerFolds = 1 : crossValFolds
+            disp(strcat('Outer Fold',{' '},num2str(outerFolds)));
+            trainingSet = targetData(training(outerCV,outerFolds),:);
+            testingSet = targetData(test(outerCV,outerFolds),:);
 
-        gammaValues = startGammaValues;
-        costValues = startCostValues;
+            gammaValues = startGammaValues;
+            costValues = startCostValues;
 
-        temp = dataTable(training(outerCV,outerFolds),:);
-        cvVar = zeros(size(temp,1),1);
-        for cs = 0 : size(groupVars,2) - 1
-            if strcmp(char(groupVars{cs + 1}),'patient') || strcmp(char(groupVars{cs + 1}),'condition')
-                if strcmp(char(groupVars{cs + 1}),'patient')
-                    cvVar = cvVar + temp.patient;
+            temp = dataTable(training(outerCV,outerFolds),:);
+            cvVar = zeros(size(temp,1),1);
+            for cs = 0 : size(groupVars,2) - 1
+                if strcmp(char(groupVars{cs + 1}),'patient') || strcmp(char(groupVars{cs + 1}),'condition')
+                    if strcmp(char(groupVars{cs + 1}),'patient')
+                        cvVar = cvVar + temp.patient;
+                    else
+                        cvVar = cvVar + temp.(groupVars{cs + 1}) * 10 ^ (-cs - 1);
+                    end
                 else
-                    cvVar = cvVar + temp.(groupVars{cs + 1}) * 10 ^ (-cs - 1);
+                    cvVar = cvVar + temp.(groupVars{cs + 1}) * 10 ^ (-cs);
                 end
-            else
-                cvVar = cvVar + temp.(groupVars{cs + 1}) * 10 ^ (-cs);
             end
-        end
-        temp.cvVar = cvVar;
-        innerCV = cvpartition(temp.cvVar,'kfold',crossValFolds);
-        temp.cvVar = [];
+            temp.cvVar = cvVar;
+            innerCV = cvpartition(temp.cvVar,'kfold',crossValFolds);
+            temp.cvVar = [];
 
-        % find opt params for current outer fold using cross validation
-        optParam = true;
-        preOptC = NaN;
-        preOptG = NaN;
-        iterationCount = 0;
-        while optParam && iterationCount < maxIterCount
-            iterationCount = iterationCount + 1;
-            results = zeros(size(gammaValues,2),size(costValues,2),crossValFolds);
-            for innerFolds = 1 : crossValFolds
-                innerTraining = trainingSet(training(innerCV,innerFolds),:);
-                innerTesting = trainingSet(test(innerCV,innerFolds),:);
-                
-                % scale inner training and testing sets using inner training
-                % min and max
-                for k = size(dummyVars,2) + 1 : size(targetData,2) - 1
-                    minimum = nanmin(innerTraining(:,k));
-                    maximum = nanmax(innerTraining(:,k));
-                    innerTraining(:,k) = (innerTraining(:,k) - minimum) / (maximum - minimum);
-                    innerTesting(:,k) = (innerTesting(:,k) - minimum) / (maximum - minimum);
-                end
+            % find opt params for current outer fold using cross validation
+            optParam = true;
+            preOptC = NaN;
+            preOptG = NaN;
+            iterationCount = 0;
+            while optParam && iterationCount < maxIterCount
+                iterationCount = iterationCount + 1;
+                results = zeros(size(gammaValues,2),size(costValues,2),crossValFolds);
+                for innerFolds = 1 : crossValFolds
+                    innerTraining = trainingSet(training(innerCV,innerFolds),:);
+                    innerTesting = trainingSet(test(innerCV,innerFolds),:);
 
-                % Grid Search
-                for g = 1 : size(gammaValues,2)
-                    for c = 1 : size(costValues,2)
-                        settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(gammaValues(g),'%f'),{' -c'},{' '},num2str(costValues(c),'%f')); 
+                    % scale inner training and testing sets using inner training
+                    % min and max
+                    for k = size(dummyVars,2) + 1 : size(targetData,2) - 1
+                        minimum = nanmin(innerTraining(:,k));
+                        maximum = nanmax(innerTraining(:,k));
+                        innerTraining(:,k) = (innerTraining(:,k) - minimum) / (maximum - minimum);
+                        innerTesting(:,k) = (innerTesting(:,k) - minimum) / (maximum - minimum);
+                    end
+
+                    %Grid Search
+                    [p,q] = meshgrid(gammaValues, costValues);
+                    pairs = [p(:) q(:)];
+                    tempResults = zeros(size(pairs,1),1);
+                    for p = 1 : size(pairs,1)
+                        settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(pairs(p,1),'%f'),{' -c'},{' '},num2str(pairs(p,2),'%f'));
                         mdl = svmtrain(innerTraining(:,end),innerTraining(:,1:end-1),settings{1});
                         preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
                         preds(preds < 0) = 0;
                         preds(preds > 100) = 100;
-                        results(g,c,innerFolds) = sum(abs(preds - innerTesting(:,end)));
+                        tempResults(p) = sum(abs(preds - innerTesting(:,end)));
+                    end
+                    for g = 1 : size(gammaValues,2)
+                        results(g,1:size(costValues,2),innerFolds) = tempResults(1 + ((g - 1) * size(costValues,2)):g * size(costValues,2));
                     end
                 end
-            end
-            results = mean(results,3);
-            [temp,index] = min(results(:));
-            [optG,optC] = ind2sub(size(results),index);
-            if optC == 1 || optG == 1 || optC == size(costValues,2) || optG == size(gammaValues,2)
-                if allowGridSearchEdgeVals
-                    optC = costValues(optC);
-                    optG = gammaValues(optG);
-                    optParam = false;
-                else
-                    if isnan(preOptC) && isnan(preOptG)
-                        error('Initial range for startCost and startGammaValues is too small');
-                    elseif isnan(preOptC)
-                        error('Initial range for startCost is too small');
-                    elseif isnan(preOptG)
-                        error('Initial range for startGammaValues is too small');
-                    else
-                        optC = preOptC;
-                        optG = preOptG;
+                results = mean(results,3);
+                [temp,index] = min(results(:));
+                [optG,optC] = ind2sub(size(results),index);
+                if optC == 1 || optG == 1 || optC == size(costValues,2) || optG == size(gammaValues,2)
+                    if allowGridSearchEdgeVals
+                        optC = costValues(optC);
+                        optG = gammaValues(optG);
                         optParam = false;
+                    else
+                        if isnan(preOptC) && isnan(preOptG)
+                            error('Initial range for startCost and startGammaValues is too small');
+                        elseif isnan(preOptC)
+                            error('Initial range for startCost is too small');
+                        elseif isnan(preOptG)
+                            error('Initial range for startGammaValues is too small');
+                        else
+                            optC = preOptC;
+                            optG = preOptG;
+                            optParam = false;
+                        end
+                    end
+                else
+                    if iterationCount == maxIterCount
+                        optC = costValues(optC);
+                        optG = gammaValues(optG);
+                        optParam = false;
+                    else
+                        preOptC = costValues(optC);
+                        preOptG = gammaValues(optG);
+                        costValues = [costValues(optC - 1), costValues(optC - 1) + ((costValues(optC) - costValues(optC - 1)) / 2), costValues(optC), costValues(optC) + ((costValues(optC + 1) - costValues(optC)) / 2), costValues(optC + 1)];
+                        gammaValues = [gammaValues(optG - 1), gammaValues(optG - 1) + ((gammaValues(optG) - gammaValues(optG - 1)) / 2), gammaValues(optG), gammaValues(optG) + ((gammaValues(optG + 1) - gammaValues(optG)) / 2), gammaValues(optG + 1)];
                     end
                 end
-            else
-                preOptC = costValues(optC);
-                preOptG = gammaValues(optG);
-                costValues = [costValues(optC - 1), costValues(optC - 1) + ((costValues(optC) - costValues(optC - 1)) / 2), costValues(optC), costValues(optC) + ((costValues(optC + 1) - costValues(optC)) / 2), costValues(optC + 1)];
-                gammaValues = [gammaValues(optG - 1), gammaValues(optG - 1) + ((gammaValues(optG) - gammaValues(optG - 1)) / 2), gammaValues(optG), gammaValues(optG) + ((gammaValues(optG + 1) - gammaValues(optG)) / 2), gammaValues(optG + 1)];
             end
-        end
-        
-        % scale outer training and testing sets for current fold
-        for k = size(dummyVars,2) + 1 : size(targetData,2) - 1
-            minimum = nanmin(trainingSet(:,k));
-            maximum = nanmax(trainingSet(:,k));
-            trainingSet(:,k) = (trainingSet(:,k) - minimum) / (maximum - minimum);
-            testingSet(:,k) = (testingSet(:,k) - minimum) / (maximum - minimum);
-        end
 
-        gamma(outerFolds) = optG;
-        cost(outerFolds) = optC;
-        settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(optG,'%f'),{' -c'},{' '},num2str(optC,'%f')); 
-        mdl = svmtrain(trainingSet(:,end),trainingSet(:,1:end-1),settings{1}); 
-        preds = svmpredict(testingSet(:,end),testingSet(:,1:end-1),mdl);
-        preds(preds < 0) = 0;
-        preds(preds > 100) = 100;
-        mdlName = strcat('mdl',num2str(outerFolds));
-        temp = struct;
-        temp.(mdlName) = mdl;
-        mdlStruct = catstruct(mdlStruct,temp);
-        errorName = strcat('error',num2str(outerFolds));
-        temp = struct;
-        temp.(errorName) = abs(preds - testingSet(:,end));
-        absErrorStruct = catstruct(absErrorStruct,temp);
+            % scale outer training and testing sets for current fold
+            minimum = NaN(1,size(targetData,2));
+            maximum = NaN(1,size(targetData,2));
+            for k = size(dummyVars,2) + 1 : size(targetData,2) - 1
+                minimum(k) = nanmin(trainingSet(:,k));
+                maximum(k) = nanmax(trainingSet(:,k));
+                trainingSet(:,k) = (trainingSet(:,k) - minimum(k)) / (maximum(k) - minimum(k));
+                testingSet(:,k) = (testingSet(:,k) - minimum(k)) / (maximum(k) - minimum(k));
+            end
+
+            gamma(outerFolds) = optG;
+            cost(outerFolds) = optC;
+            settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(optG,'%f'),{' -c'},{' '},num2str(optC,'%f')); 
+            mdl = svmtrain(trainingSet(:,end),trainingSet(:,1:end-1),settings{1}); 
+            preds = svmpredict(testingSet(:,end),testingSet(:,1:end-1),mdl);
+            preds(preds < 0) = 0;
+            preds(preds > 100) = 100;
+            mdlName = strcat('mdl',num2str(outerFolds));
+            minName = strcat('minimums',num2str(outerFolds));
+            maxName = strcat('maximums',num2str(outerFolds));
+            temp = struct;
+            temp.(mdlName) = mdl;
+            temp.(minName) = minimum;
+            temp.(maxName) = maximum;
+            mdlStruct = catstruct(mdlStruct,temp);
+            errorName = strcat('error',num2str(outerFolds));
+            temp = struct;
+            temp.(errorName) = abs(preds - testingSet(:,end));
+            absErrorStruct = catstruct(absErrorStruct,temp);
+        end
+    else
+        for outerFolds = 1 : crossValFolds
+            disp(strcat('Outer Fold',{' '},num2str(outerFolds)));
+            trainingSet = targetData(training(outerCV,outerFolds),:);
+            testingSet = targetData(test(outerCV,outerFolds),:);
+
+            gammaValues = startGammaValues;
+            costValues = startCostValues;
+
+            temp = dataTable(training(outerCV,outerFolds),:);
+            cvVar = zeros(size(temp,1),1);
+            for cs = 0 : size(groupVars,2) - 1
+                if strcmp(char(groupVars{cs + 1}),'patient') || strcmp(char(groupVars{cs + 1}),'condition')
+                    if strcmp(char(groupVars{cs + 1}),'patient')
+                        cvVar = cvVar + temp.patient;
+                    else
+                        cvVar = cvVar + temp.(groupVars{cs + 1}) * 10 ^ (-cs - 1);
+                    end
+                else
+                    cvVar = cvVar + temp.(groupVars{cs + 1}) * 10 ^ (-cs);
+                end
+            end
+            temp.cvVar = cvVar;
+            innerCV = cvpartition(temp.cvVar,'kfold',crossValFolds);
+            temp.cvVar = [];
+
+            % find opt params for current outer fold using cross validation
+            optParam = true;
+            preOptC = NaN;
+            preOptG = NaN;
+            iterationCount = 0;
+            while optParam && iterationCount < maxIterCount
+                iterationCount = iterationCount + 1;
+                results = zeros(size(gammaValues,2),size(costValues,2),crossValFolds);
+                for innerFolds = 1 : crossValFolds
+                    innerTraining = trainingSet(training(innerCV,innerFolds),:);
+                    innerTesting = trainingSet(test(innerCV,innerFolds),:);
+
+                    % scale inner training and testing sets using inner training
+                    % min and max
+                    for k = size(dummyVars,2) + 1 : size(targetData,2) - 1
+                        minimum = nanmin(innerTraining(:,k));
+                        maximum = nanmax(innerTraining(:,k));
+                        innerTraining(:,k) = (innerTraining(:,k) - minimum) / (maximum - minimum);
+                        innerTesting(:,k) = (innerTesting(:,k) - minimum) / (maximum - minimum);
+                    end
+
+                    %Grid Search
+                    [p,q] = meshgrid(gammaValues, costValues);
+                    pairs = [p(:) q(:)];
+                    tempResults = zeros(size(pairs,1),1);
+                    parfor p = 1 : size(pairs,1)
+                        settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(pairs(p,1),'%f'),{' -c'},{' '},num2str(pairs(p,2),'%f'));
+                        mdl = svmtrain(innerTraining(:,end),innerTraining(:,1:end-1),settings{1});
+                        preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
+                        preds(preds < 0) = 0;
+                        preds(preds > 100) = 100;
+                        tempResults(p) = sum(abs(preds - innerTesting(:,end)));
+                    end
+                    for g = 1 : size(gammaValues,2)
+                        results(g,1:size(costValues,2),innerFolds) = tempResults(1 + ((g - 1) * size(costValues,2)):g * size(costValues,2));
+                    end
+                end
+                results = mean(results,3);
+                [temp,index] = min(results(:));
+                [optG,optC] = ind2sub(size(results),index);
+                if optC == 1 || optG == 1 || optC == size(costValues,2) || optG == size(gammaValues,2)
+                    if allowGridSearchEdgeVals
+                        optC = costValues(optC);
+                        optG = gammaValues(optG);
+                        optParam = false;
+                    else
+                        if isnan(preOptC) && isnan(preOptG)
+                            error('Initial range for startCost and startGammaValues is too small');
+                        elseif isnan(preOptC)
+                            error('Initial range for startCost is too small');
+                        elseif isnan(preOptG)
+                            error('Initial range for startGammaValues is too small');
+                        else
+                            optC = preOptC;
+                            optG = preOptG;
+                            optParam = false;
+                        end
+                    end
+                else
+                    if iterationCount == maxIterCount
+                        optC = costValues(optC);
+                        optG = gammaValues(optG);
+                        optParam = false;
+                    else
+                        preOptC = costValues(optC);
+                        preOptG = gammaValues(optG);
+                        costValues = [costValues(optC - 1), costValues(optC - 1) + ((costValues(optC) - costValues(optC - 1)) / 2), costValues(optC), costValues(optC) + ((costValues(optC + 1) - costValues(optC)) / 2), costValues(optC + 1)];
+                        gammaValues = [gammaValues(optG - 1), gammaValues(optG - 1) + ((gammaValues(optG) - gammaValues(optG - 1)) / 2), gammaValues(optG), gammaValues(optG) + ((gammaValues(optG + 1) - gammaValues(optG)) / 2), gammaValues(optG + 1)];
+                    end
+                end
+            end
+
+            % scale outer training and testing sets for current fold
+            minimum = NaN(1,size(targetData,2));
+            maximum = NaN(1,size(targetData,2));
+            for k = size(dummyVars,2) + 1 : size(targetData,2) - 1
+                minimum(k) = nanmin(trainingSet(:,k));
+                maximum(k) = nanmax(trainingSet(:,k));
+                trainingSet(:,k) = (trainingSet(:,k) - minimum(k)) / (maximum(k) - minimum(k));
+                testingSet(:,k) = (testingSet(:,k) - minimum(k)) / (maximum(k) - minimum(k));
+            end
+
+            gamma(outerFolds) = optG;
+            cost(outerFolds) = optC;
+            settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(optG,'%f'),{' -c'},{' '},num2str(optC,'%f')); 
+            mdl = svmtrain(trainingSet(:,end),trainingSet(:,1:end-1),settings{1}); 
+            preds = svmpredict(testingSet(:,end),testingSet(:,1:end-1),mdl);
+            preds(preds < 0) = 0;
+            preds(preds > 100) = 100;
+            mdlName = strcat('mdl',num2str(outerFolds));
+            minName = strcat('minimums',num2str(outerFolds));
+            maxName = strcat('maximums',num2str(outerFolds));
+            temp = struct;
+            temp.(mdlName) = mdl;
+            temp.(minName) = minimum;
+            temp.(maxName) = maximum;
+            mdlStruct = catstruct(mdlStruct,temp);
+            errorName = strcat('error',num2str(outerFolds));
+            temp = struct;
+            temp.(errorName) = abs(preds - testingSet(:,end));
+            absErrorStruct = catstruct(absErrorStruct,temp);
+        end
     end
     delete(gcp);
     
@@ -418,17 +583,23 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     SVMSettings.gamma = gamma;
     SVMSettings.seed = seed;
     SVMSettings.dataTable = dataTable;
+    SVMSettings.targetData = targetData;
     SVMSettings.degree = degree;
     SVMSettings.kernal = kernal;
     SVMSettings.groupVars = groupVars;
     SVMSettings.startGammaValues = startGammaValues;
     SVMSettings.startCostValues = startCostValues;
     SVMSettings.crossValFolds = crossValFolds;
-    SVMSettings.badPredNames = badPredTable.Properties.VariableNames;
+    if exist('badPredTable','var')
+        SVMSettings.badPredNames = badPredTable.Properties.VariableNames;
+    else
+        SVMSettings.badPredNames = NaN;
+    end
     
     if saveResults
         save(strcat(saveLocation,response{1}),'SVMSettings','mdlStruct','absErrorStruct'); 
     end
     
 end
+
 
