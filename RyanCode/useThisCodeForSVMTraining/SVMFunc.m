@@ -384,7 +384,6 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         optParam = false;
                     else
                         preOptC = costValues(optC);
-                        optC = costValues(optC);
                         if size(costValues,2) == 1
                             costValues = costValues;
                         elseif size(costValues,2) == 2
@@ -393,6 +392,7 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         else
                             costValues = [costValues(optC - 1), costValues(optC - 1) + ((costValues(optC) - costValues(optC - 1)) / 2), costValues(optC), costValues(optC) + ((costValues(optC + 1) - costValues(optC)) / 2), costValues(optC + 1)];
                         end
+                        optC = costValues(optC);
                     end
                 end
                 
@@ -418,7 +418,6 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         optParam = false;
                     else
                         preOptG = gammaValues(optG);
-                        optG = gammaValues(optG);
                         if size(gammaValues,2) == 1
                             gammaValues = gammaValues;
                         elseif size(gammaValues,2) == 2
@@ -427,6 +426,7 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         else
                             gammaValues = [gammaValues(optG - 1), gammaValues(optG - 1) + ((gammaValues(optG) - gammaValues(optG - 1)) / 2), gammaValues(optG), gammaValues(optG) + ((gammaValues(optG + 1) - gammaValues(optG)) / 2), gammaValues(optG + 1)];
                         end
+                        optG = gammaValues(optG);
                     end
                 end
             end
@@ -549,7 +549,6 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         optParam = false;
                     else
                         preOptC = costValues(optC);
-                        optC = costValues(optC);
                         if size(costValues,2) == 1
                             costValues = costValues;
                         elseif size(costValues,2) == 2
@@ -558,6 +557,7 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         else
                             costValues = [costValues(optC - 1), costValues(optC - 1) + ((costValues(optC) - costValues(optC - 1)) / 2), costValues(optC), costValues(optC) + ((costValues(optC + 1) - costValues(optC)) / 2), costValues(optC + 1)];
                         end
+                        optC = costValues(optC);
                     end
                 end
                 
@@ -583,7 +583,6 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         optParam = false;
                     else
                         preOptG = gammaValues(optG);
-                        optG = gammaValues(optG);
                         if size(gammaValues,2) == 1
                             gammaValues = gammaValues;
                         elseif size(gammaValues,2) == 2
@@ -592,6 +591,7 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         else
                             gammaValues = [gammaValues(optG - 1), gammaValues(optG - 1) + ((gammaValues(optG) - gammaValues(optG - 1)) / 2), gammaValues(optG), gammaValues(optG) + ((gammaValues(optG + 1) - gammaValues(optG)) / 2), gammaValues(optG + 1)];
                         end
+                        optG = gammaValues(optG);
                     end
                 end
             end
@@ -675,5 +675,4 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     end
     
 end
-
 
