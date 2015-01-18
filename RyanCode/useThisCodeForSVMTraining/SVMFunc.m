@@ -362,10 +362,9 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                 results = mean(results,3);
                 [temp,index] = min(results(:));
                 [optG,optC] = ind2sub(size(results),index);
-                if optC == 1 || optG == 1 || optC == size(costValues,2) || optG == size(gammaValues,2)
+                if ((optC == 1 || optC == size(costValues,2)) && size(costValues,2) > 2)
                     if allowGridSearchEdgeVals
                         optC = costValues(optC);
-                        optG = gammaValues(optG);
                         optParam = false;
                     else
                         if isnan(preOptC) && isnan(preOptG)
@@ -376,20 +375,58 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                             error('Initial range for startGammaValues is too small');
                         else
                             optC = preOptC;
-                            optG = preOptG;
                             optParam = false;
                         end
                     end
                 else
                     if iterationCount == maxIterCount
                         optC = costValues(optC);
-                        optG = gammaValues(optG);
                         optParam = false;
                     else
                         preOptC = costValues(optC);
+                        optC = costValues(optC);
+                        if size(costValues,2) == 1
+                            costValues = costValues;
+                        elseif size(costValues,2) == 2
+                            costValues = [costValues(1), costValues(1) + (costValues(2) - costValues(1)) / 2, costValues(2)];
+                            costValues = [costValues(1), costValues(1) + ((costValues(2) - costValues(1)) / 2), costValues(2), costValues(2) + ((costValues(3) - costValues(2)) / 2), costValues(3)];
+                        else
+                            costValues = [costValues(optC - 1), costValues(optC - 1) + ((costValues(optC) - costValues(optC - 1)) / 2), costValues(optC), costValues(optC) + ((costValues(optC + 1) - costValues(optC)) / 2), costValues(optC + 1)];
+                        end
+                    end
+                end
+                
+                if  ((optG == 1  || optG == size(gammaValues,2)) && size(gammaValues,2) > 2)
+                    if allowGridSearchEdgeVals
+                        optG = gammaValues(optG);
+                        optParam = false;
+                    else
+                        if isnan(preOptC) && isnan(preOptG)
+                            error('Initial range for startCost and startGammaValues is too small');
+                        elseif isnan(preOptC)
+                            error('Initial range for startCost is too small');
+                        elseif isnan(preOptG)
+                            error('Initial range for startGammaValues is too small');
+                        else
+                            optG = preOptG;
+                            optParam = false;
+                        end
+                    end
+                else
+                    if iterationCount == maxIterCount
+                        optG = gammaValues(optG);
+                        optParam = false;
+                    else
                         preOptG = gammaValues(optG);
-                        costValues = [costValues(optC - 1), costValues(optC - 1) + ((costValues(optC) - costValues(optC - 1)) / 2), costValues(optC), costValues(optC) + ((costValues(optC + 1) - costValues(optC)) / 2), costValues(optC + 1)];
-                        gammaValues = [gammaValues(optG - 1), gammaValues(optG - 1) + ((gammaValues(optG) - gammaValues(optG - 1)) / 2), gammaValues(optG), gammaValues(optG) + ((gammaValues(optG + 1) - gammaValues(optG)) / 2), gammaValues(optG + 1)];
+                        optG = gammaValues(optG);
+                        if size(gammaValues,2) == 1
+                            gammaValues = gammaValues;
+                        elseif size(gammaValues,2) == 2
+                            gammaValues = [gammaValues(1), gammaValues(1) + (gammaValues(2) - gammaValues(1)) / 2, gammaValues(2)];
+                            gammaValues = [gammaValues(1), gammaValues(1) + ((gammaValues(2) - gammaValues(1)) / 2), gammaValues(2), gammaValues(2) + ((gammaValues(3) - gammaValues(2)) / 2), gammaValues(3)];
+                        else
+                            gammaValues = [gammaValues(optG - 1), gammaValues(optG - 1) + ((gammaValues(optG) - gammaValues(optG - 1)) / 2), gammaValues(optG), gammaValues(optG) + ((gammaValues(optG + 1) - gammaValues(optG)) / 2), gammaValues(optG + 1)];
+                        end
                     end
                 end
             end
@@ -490,10 +527,9 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                 results = mean(results,3);
                 [temp,index] = min(results(:));
                 [optG,optC] = ind2sub(size(results),index);
-                if optC == 1 || optG == 1 || optC == size(costValues,2) || optG == size(gammaValues,2)
+                if ((optC == 1 || optC == size(costValues,2)) && size(costValues,2) > 2)
                     if allowGridSearchEdgeVals
                         optC = costValues(optC);
-                        optG = gammaValues(optG);
                         optParam = false;
                     else
                         if isnan(preOptC) && isnan(preOptG)
@@ -504,20 +540,58 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                             error('Initial range for startGammaValues is too small');
                         else
                             optC = preOptC;
-                            optG = preOptG;
                             optParam = false;
                         end
                     end
                 else
                     if iterationCount == maxIterCount
                         optC = costValues(optC);
-                        optG = gammaValues(optG);
                         optParam = false;
                     else
                         preOptC = costValues(optC);
+                        optC = costValues(optC);
+                        if size(costValues,2) == 1
+                            costValues = costValues;
+                        elseif size(costValues,2) == 2
+                            costValues = [costValues(1), costValues(1) + (costValues(2) - costValues(1)) / 2, costValues(2)];
+                            costValues = [costValues(1), costValues(1) + ((costValues(2) - costValues(1)) / 2), costValues(2), costValues(2) + ((costValues(3) - costValues(2)) / 2), costValues(3)];
+                        else
+                            costValues = [costValues(optC - 1), costValues(optC - 1) + ((costValues(optC) - costValues(optC - 1)) / 2), costValues(optC), costValues(optC) + ((costValues(optC + 1) - costValues(optC)) / 2), costValues(optC + 1)];
+                        end
+                    end
+                end
+                
+                if  ((optG == 1  || optG == size(gammaValues,2)) && size(gammaValues,2) > 2)
+                    if allowGridSearchEdgeVals
+                        optG = gammaValues(optG);
+                        optParam = false;
+                    else
+                        if isnan(preOptC) && isnan(preOptG)
+                            error('Initial range for startCost and startGammaValues is too small');
+                        elseif isnan(preOptC)
+                            error('Initial range for startCost is too small');
+                        elseif isnan(preOptG)
+                            error('Initial range for startGammaValues is too small');
+                        else
+                            optG = preOptG;
+                            optParam = false;
+                        end
+                    end
+                else
+                    if iterationCount == maxIterCount
+                        optG = gammaValues(optG);
+                        optParam = false;
+                    else
                         preOptG = gammaValues(optG);
-                        costValues = [costValues(optC - 1), costValues(optC - 1) + ((costValues(optC) - costValues(optC - 1)) / 2), costValues(optC), costValues(optC) + ((costValues(optC + 1) - costValues(optC)) / 2), costValues(optC + 1)];
-                        gammaValues = [gammaValues(optG - 1), gammaValues(optG - 1) + ((gammaValues(optG) - gammaValues(optG - 1)) / 2), gammaValues(optG), gammaValues(optG) + ((gammaValues(optG + 1) - gammaValues(optG)) / 2), gammaValues(optG + 1)];
+                        optG = gammaValues(optG);
+                        if size(gammaValues,2) == 1
+                            gammaValues = gammaValues;
+                        elseif size(gammaValues,2) == 2
+                            gammaValues = [gammaValues(1), gammaValues(1) + (gammaValues(2) - gammaValues(1)) / 2, gammaValues(2)];
+                            gammaValues = [gammaValues(1), gammaValues(1) + ((gammaValues(2) - gammaValues(1)) / 2), gammaValues(2), gammaValues(2) + ((gammaValues(3) - gammaValues(2)) / 2), gammaValues(3)];
+                        else
+                            gammaValues = [gammaValues(optG - 1), gammaValues(optG - 1) + ((gammaValues(optG) - gammaValues(optG - 1)) / 2), gammaValues(optG), gammaValues(optG) + ((gammaValues(optG + 1) - gammaValues(optG)) / 2), gammaValues(optG + 1)];
+                        end
                     end
                 end
             end
