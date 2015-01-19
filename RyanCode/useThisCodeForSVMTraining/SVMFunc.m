@@ -21,8 +21,7 @@
 %                                    path.  Add by column NOT row.
 %           string: saveLocation - location to save results; if not present
 %                                  results are only returned, not saved.
-%                                  Include a slash at the end of the
-%                                  string.
+%                                  Include the full name you wish to use.
 %           string: dataLocation - location of dataset (must be table named
 %                                  dataTable saved at this .mat location)
 %           cell array: response - name of the response being predicted
@@ -48,6 +47,7 @@
 %           int: degree - gives degree of SVM model. default is 1
 %           int: kernal - gives SVM kernal using libSVM syntax. default is
 %                         1
+%           cellArray: toRemove - cell array of predictor names to remove.
 % Return:
 %   struct: SVMSettings
 %       fields:
@@ -179,6 +179,9 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     else
         kernal = 2; 
     end
+    if isfield(inputStruct,'toRemove')
+        dataTable(:,inputStruct.toRemove) = [];
+    end
     
     % get information used to find optimal place for parallelization
     innerParFor = ((ceil(size(startGammaValues,2) / numCores) * size(startCostValues,2)) + (ceil(5 / numCores) * 5 * (maxIterCount - 1))) * (crossValFolds * crossValFolds);
@@ -264,23 +267,27 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     
     % dummy encode survey preds
     zeroPreds = {'tf','tl','vc','cp','rs','nl','condition'};
+    index = 1;
     for k = 1 : size(surveyPreds,2)
-        if ismember(surveyPreds{k},tableNames)
-            if k == 1
-                if ismember(surveyPreds{k},zeroPreds)
-                    dummyVars = dummyvar(dataTable.(surveyPreds{k}) + 1);
+        if ismember(surveyPreds{index},tableNames)
+            if index == 1
+                if ismember(surveyPreds{index},zeroPreds)
+                    dummyVars = dummyvar(dataTable.(surveyPreds{index}) + 1);
                     dummyVars = dummyVars(:,2:end);
                 else
-                    dummyVars = dummyvar(dataTable.(surveyPreds{k}));
+                    dummyVars = dummyvar(dataTable.(surveyPreds{index}));
                 end
             else
-                if ismember(surveyPreds{k},zeroPreds)
-                    temp = dummyvar(dataTable.(surveyPreds{k}) + 1);
+                if ismember(surveyPreds{index},zeroPreds)
+                    temp = dummyvar(dataTable.(surveyPreds{index}) + 1);
                     dummyVars = [dummyVars,temp(:,2:end)];
                 else
-                    dummyVars = [dummyVars,dummyvar(dataTable.(surveyPreds{k}))];
+                    dummyVars = [dummyVars,dummyvar(dataTable.(surveyPreds{index}))];
                 end
             end
+            index = index + 1;
+        else
+            surveyPreds(index) = [];
         end
     end
     dummyVars(:,sum(dummyVars,1) == 0) = [];
@@ -648,7 +655,7 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
         legend('Fold 1','Fold 2','Fold 3','Fold 4','Fold 5');
         hold off;
         if saveResults
-            savefig(strcat(saveLocation,response{1},'.fig'));
+            savefig(strcat(saveLocation,'.fig'));
         end
     end
     
@@ -671,8 +678,9 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     end
     
     if saveResults
-        save(strcat(saveLocation,response{1}),'SVMSettings','mdlStruct','absErrorStruct'); 
+        save(saveLocation,'SVMSettings','mdlStruct','absErrorStruct'); 
     end
     
 end
+
 
