@@ -10,7 +10,7 @@
 % http://www.mathworks.com/matlabcentral/fileexchange/7842-catstruct
 %
 % NOTICE THAT THIS FUNCTION ASSUMES THAT THE ONLY CATEGORICAL VARIABLES
-% THAT WILL EVER BE PASSED TO AT WILL BE MEMBERS OF THE SET [patient,
+% THAT WILL EVER BE PASSED TO IT WILL BE MEMBERS OF THE SET [patient,
 % condition, ac, lc, tf, tl, vc, cp, rs, nz, nl]
 %
 % Params: 
@@ -46,7 +46,7 @@
 %                                           Default is false
 %           int: degree - gives degree of SVM model. default is 1
 %           int: kernal - gives SVM kernal using libSVM syntax. default is
-%                         1
+%                         2
 %           cellArray: toRemove - cell array of predictor names to remove.
 % Return:
 %   struct: SVMSettings
@@ -78,12 +78,29 @@
 %                              predictor that was used for scalings
 %           array: maximums# - gives the maximum value of each numerical
 %                              predictor that was used for scalings
-%   struct: absErrorStruct
+%   struct: errorStruct
 %       fields:
-%           array: error# - gives the abs error for each sample of the test
-%                           set for each outer fold
+%           array: outerPred# - gives the prediction for each sample using mdl#
+%                          on the testing fold
+%           array: outerReal# - gives the real value for each sample of the
+%                          testing fold. 
+%           array: outer#Inner#Depth#Pred - gives the predicted values for
+%                                           each sample of the inner fold
+%                                           of the specified outer fold at
+%                                           the given iteration depth
+%                                           (maximum iteration depth is
+%                                           given by the maxIterCount field
+%                                           of inputStruct).
+%           array: outer#Inner#Depth#Real - gives the real values for each
+%                                           sample of the inner fold of the
+%                                           specified outer fold at the
+%                                           given iteration depth (maximum
+%                                           iteration depth is given by the
+%                                           maxIterCount field of
+%                                           inputStruct).
+%                                           
 
-function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
+function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
 
     surveyPreds = {'patient','condition','ac','lc','tf','tl','vc','cp','rs','nz','nl'};
     posResponses = {'sp','le','ld','ld2','lcl','ap','qol','im','st'};
@@ -143,7 +160,6 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     else
         seed = 100; 
     end
-    rng(seed);
     if isfield(inputStruct,'maxIterCount')
         maxIterCount = inputStruct.maxIterCount; 
     else
@@ -201,6 +217,7 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     disp('Beginning Preprocessing');
     
    % build testing folds for outer cross validation
+    rng(seed);
     cvVar = zeros(size(dataTable,1),1);
     for cs = 0 : size(groupVars,2) - 1
         if strcmp(char(groupVars{cs + 1}),'patient') || strcmp(char(groupVars{cs + 1}),'condition')
@@ -263,8 +280,25 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
         dataTable(:,toRemove) = [];
     end
     
-    tableNames = dataTable.Properties.VariableNames;
+    % build testing folds for outer cross validation
+    rng(seed);
+    cvVar = zeros(size(dataTable,1),1);
+    for cs = 0 : size(groupVars,2) - 1
+        if strcmp(char(groupVars{cs + 1}),'patient') || strcmp(char(groupVars{cs + 1}),'condition')
+            if strcmp(char(groupVars{cs + 1}),'patient')
+                cvVar = cvVar + dataTable.patient;
+            else
+                cvVar = cvVar + dataTable.(groupVars{cs + 1}) * 10 ^ (-cs - 1);
+            end
+        else
+            cvVar = cvVar + dataTable.(groupVars{cs + 1}) * 10 ^ (-cs);
+        end
+    end
+    dataTable.cvVar = cvVar;
+    outerCV = cvpartition(dataTable.cvVar,'kfold',crossValFolds);
+    dataTable.cvVar = [];
     
+    tableNames = dataTable.Properties.VariableNames;
     % dummy encode survey preds
     zeroPreds = {'tf','tl','vc','cp','rs','nl','condition'};
     index = 1;
@@ -301,11 +335,12 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     cost = zeros(1,crossValFolds);
     
     mdlStruct = struct;
-    absErrorStruct = struct;
+    errorStruct = struct;
     
+    innerFoldErrors = NaN(maxIterCount,crossValFolds,crossValFolds);
     if outerParFor <= innerParFor
         parfor outerFolds = 1 : crossValFolds
-            disp(strcat('Outer Fold',{' '},num2str(outerFolds)));
+            disp(strcat('Outer Fold',{' '},num2str(outerFolds),{' '},'Started'));
             trainingSet = targetData(training(outerCV,outerFolds),:);
             testingSet = targetData(test(outerCV,outerFolds),:);
 
@@ -360,6 +395,12 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
                         preds(preds < 0) = 0;
                         preds(preds > 100) = 100;
+                        errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Pred');
+                        errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Real');
+                        tempStruct = struct;
+                        tempStruct.(errorResultsNamePred) = preds;
+                        tempStruct.(errorResultsNameReal) = innerTesting(:,end);
+                        errorStruct = catstruct(errorStruct,tempStruct);
                         tempResults(p) = sum(abs(preds - innerTesting(:,end)));
                     end
                     for g = 1 : size(gammaValues,2)
@@ -463,14 +504,17 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
             temp.(minName) = minimum;
             temp.(maxName) = maximum;
             mdlStruct = catstruct(mdlStruct,temp);
-            errorName = strcat('error',num2str(outerFolds));
+            predName = strcat('outerPred',num2str(outerFolds));
+            realName = strcat('outerReal',num2str(outerFolds));
             temp = struct;
-            temp.(errorName) = abs(preds - testingSet(:,end));
-            absErrorStruct = catstruct(absErrorStruct,temp);
+            temp.(predName) = preds;
+            temp.(realName) = testingSet(:,end);
+            errorStruct = catstruct(errorStruct,temp);
+            disp(strcat('Outer Fold',{' '},num2str(outerFolds),{' '},'Completed'));
         end
     else
         for outerFolds = 1 : crossValFolds
-            disp(strcat('Outer Fold',{' '},num2str(outerFolds)));
+            disp(strcat('Outer Fold',{' '},num2str(outerFolds),{' '},'Started'));
             trainingSet = targetData(training(outerCV,outerFolds),:);
             testingSet = targetData(test(outerCV,outerFolds),:);
 
@@ -525,6 +569,12 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
                         preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
                         preds(preds < 0) = 0;
                         preds(preds > 100) = 100;
+                        errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Pred');
+                        errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Real');
+                        tempStruct = struct;
+                        tempStruct.(errorResultsNamePred) = preds;
+                        tempStruct.(errorResultsNameReal) = innerTesting(:,end);
+                        errorStruct = catstruct(errorStruct,tempStruct);
                         tempResults(p) = sum(abs(preds - innerTesting(:,end)));
                     end
                     for g = 1 : size(gammaValues,2)
@@ -628,25 +678,28 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
             temp.(minName) = minimum;
             temp.(maxName) = maximum;
             mdlStruct = catstruct(mdlStruct,temp);
-            errorName = strcat('error',num2str(outerFolds));
+            predName = strcat('outerPred',num2str(outerFolds));
+            realName = strcat('outerReal',num2str(outerFolds));
             temp = struct;
-            temp.(errorName) = abs(preds - testingSet(:,end));
-            absErrorStruct = catstruct(absErrorStruct,temp);
+            temp.(predName) = preds;
+            temp.(realName) = testingSet(:,end);
+            errorStruct = catstruct(errorStruct,temp);
+            disp(strcat('Outer Fold',{' '},num2str(outerFolds),{' '},'Completed'));
         end
     end
     delete(gcp);
     
     if crossValFolds == 5 && makePlot
         hold on;
-        h = cdfplot(absErrorStruct.error1);
+        h = cdfplot(abs(errorStruct.outerPred1 - errorStruct.outerReal1));
         set(h,'color','b');
-        h = cdfplot(absErrorStruct.error2);
+        h = cdfplot(abs(errorStruct.outerPred2 - errorStruct.outerReal2));
         set(h,'color','r');
-        h = cdfplot(absErrorStruct.error3);
+        h = cdfplot(abs(errorStruct.outerPred3 - errorStruct.outerReal3));
         set(h,'color','g');
-        h = cdfplot(absErrorStruct.error4);
+        h = cdfplot(abs(errorStruct.outerPred4 - errorStruct.outerReal4));
         set(h,'color','c');
-        h = cdfplot(absErrorStruct.error5);
+        h = cdfplot(abs(errorStruct.outerPred5 - errorStruct.outerReal5));
         set(h,'color','k');
         title(strcat('Cross Validation Results for',{' '},response{1}));
         xlabel('Abs Error');
@@ -678,9 +731,8 @@ function [ SVMSettings, mdlStruct, absErrorStruct ] = SVMFunc( inputStruct )
     end
     
     if saveResults
-        save(saveLocation,'SVMSettings','mdlStruct','absErrorStruct'); 
+        save(saveLocation,'SVMSettings','mdlStruct','errorStruct','-v7.3'); 
     end
     
 end
-
 
