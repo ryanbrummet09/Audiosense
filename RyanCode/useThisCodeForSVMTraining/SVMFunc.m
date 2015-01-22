@@ -1,13 +1,14 @@
 % Ryan Brummet 
 % University of Iowa
 %
-% Notice that this function creates a SVM model for each specified fold
+% Notice that this function creates a model for each specified fold
 % with a grid search being conducte over only gamma and cost.  Every field
 % for the inputStruct has a default value except for dataLocation, 
 % response, and groupVars.  Change values as needed.  Field names given to 
 % inputStruct must be exactly named as presented below.  For this script to
 % run the catstruct library is needed.  You may find the library at
-% http://www.mathworks.com/matlabcentral/fileexchange/7842-catstruct
+% http://www.mathworks.com/matlabcentral/fileexchange/7842-catstruct.  If
+% using SVM libSVM is needed.  If creating a linear model use libLinear.
 %
 % NOTICE THAT THIS FUNCTION ASSUMES THAT THE ONLY CATEGORICAL VARIABLES
 % THAT WILL EVER BE PASSED TO IT WILL BE MEMBERS OF THE SET [patient,
@@ -16,7 +17,9 @@
 % Params: 
 %    struct: inputStruct
 %       fields: 
-%           string: libSVMLibLocation - location of libSVM library
+%           string: libLocation - location of libSVM library
+%           int: libToUse - 1 to use libSVM library syntax. 2 to use
+%                           liblLinear library syntax.  Default is libSVM.
 %           cell array: dirsToPath - location of directories to add to
 %                                    path.  Add by column NOT row.
 %           string: saveLocation - location to save results; if not present
@@ -45,8 +48,10 @@
 %                                           are allowed (no error thrown).
 %                                           Default is false
 %           int: degree - gives degree of SVM model. default is 1
-%           int: kernal - gives SVM kernal using libSVM syntax. default is
-%                         2
+%           int: kernel - gives kernal/solver using either libSVM or
+%                         libLinear syntax.  Default is 2 (RBF) for libSVM
+%                         and 11 (L2-regularized L2-loss support vector 
+%                         regression, primal) for libLinear.
 %           cellArray: toRemove - cell array of predictor names to remove.
 % Return:
 %   struct: SVMSettings
@@ -106,8 +111,13 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
     posResponses = {'sp','le','ld','ld2','lcl','ap','qol','im','st'};
 
     % handle present and missing field values
-    if isfield(inputStruct,'libSVMLibLocation');
-        addpath(genpath(inputStruct.libSVMLibLocation));
+    if isfield(inputStruct,'libLocation')
+        addpath(genpath(inputStruct.libLocation));
+    end
+    if isfield(inputStruct,'libToUse')
+        libToUse = inputStruct.libToUse;
+    else
+        libToUse = 1;
     end
     if isfield(inputStruct,'dirsToPath')
         temp = inputStruct.dirsToPath;
@@ -171,9 +181,17 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
         crossValFolds = 5;
     end
     if isfield(inputStruct,'startGammaValues')
-        startGammaValues = inputStruct.startGammaValues;
+        if libToUse == 2
+            startGammaValues = [1]; 
+        else
+            startGammaValues = inputStruct.startGammaValues;
+        end
     else
-        startGammaValues = [.00001,.0001,.001,.01,.1,1,10,100,1000,10000,50000,100000];
+        if libToUse == 2
+            startGammaValues = [1];
+        else
+            startGammaValues = [.00001,.0001,.001,.01,.1,1,10,100,1000,10000,50000,100000];
+        end
     end
     if isfield(inputStruct,'startCostValues')
         startCostValues = inputStruct.startCostValues; 
@@ -190,10 +208,14 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
     else
         degree = 1;
     end
-    if isfield(inputStruct,'kernal')
-        kernal = inputStruct.kernal;
+    if isfield(inputStruct,'kernel')
+        kernel = inputStruct.kernel;
     else
-        kernal = 2; 
+        if libToUse == 1
+            kernel = 2;
+        elseif libToUse == 2
+            kernel = 11;
+        end
     end
     if isfield(inputStruct,'toRemove')
         dataTable(:,inputStruct.toRemove) = [];
@@ -207,7 +229,7 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
     disp(strcat('Max grid search iterations:',{' '},num2str(maxIterCount)));
     disp(strcat('Outer/Inner cross validation folds:',{' '},num2str(crossValFolds)));
     disp(strcat('Degree:',{' '},num2str(degree)));
-    disp(strcat('Kernal:',{' '},num2str(kernal)));
+    disp(strcat('Kernal:',{' '},num2str(kernel)));
     if outerParFor <= innerParFor
         disp({'Using outer parallelization'}); 
     else
@@ -337,7 +359,6 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
     mdlStruct = struct;
     errorStruct = struct;
     
-    innerFoldErrors = NaN(maxIterCount,crossValFolds,crossValFolds);
     if outerParFor <= innerParFor
         parfor outerFolds = 1 : crossValFolds
             disp(strcat('Outer Fold',{' '},num2str(outerFolds),{' '},'Started'));
@@ -389,23 +410,46 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
                     [p,q] = meshgrid(gammaValues, costValues);
                     pairs = [p(:) q(:)];
                     tempResults = zeros(size(pairs,1),1);
+                    outerTempStruct = struct;
                     for p = 1 : size(pairs,1)
-                        settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(pairs(p,1),'%f'),{' -c'},{' '},num2str(pairs(p,2),'%f'));
-                        mdl = svmtrain(innerTraining(:,end),innerTraining(:,1:end-1),settings{1});
-                        preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
+                        if libToUse == 1
+                            settings = strcat('-q -s 3 -t',{' '},num2str(kernel),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(pairs(p,1),'%f'),{' -c'},{' '},num2str(pairs(p,2),'%f'));
+                            mdl = svmtrain(innerTraining(:,end),innerTraining(:,1:end-1),settings{1});
+                            preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
+                        else
+                            settings = strcat('-q -s',{' '},num2str(kernel),{' -c'},{' '},num2str(pairs(p,2),'%f'));
+                            mySparseTrain = sparse(innerTraining(:,1:end-1));
+                            mdl = train(innerTraining(:,end),mySparseTrain,settings{1});
+                            mySparseTest = sparse(innerTesting(:,1:end-1));
+                            preds = predict(innerTesting(:,end),mySparseTest,mdl);
+                        end
+                        
                         preds(preds < 0) = 0;
                         preds(preds > 100) = 100;
-                        errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Pred');
-                        errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Real');
-                        tempStruct = struct;
-                        tempStruct.(errorResultsNamePred) = preds;
-                        tempStruct.(errorResultsNameReal) = innerTesting(:,end);
-                        errorStruct = catstruct(errorStruct,tempStruct);
+                        errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Pred',num2str(p));
+                        errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Real',num2str(p));
+                        innerTempStruct = struct;
+                        innerTempStruct.(errorResultsNamePred) = preds;
+                        innerTempStruct.(errorResultsNameReal) = innerTesting(:,end);
+                        outerTempStruct = catstruct(outerTempStruct,innerTempStruct);
                         tempResults(p) = sum(abs(preds - innerTesting(:,end)));
                     end
                     for g = 1 : size(gammaValues,2)
                         results(g,1:size(costValues,2),innerFolds) = tempResults(1 + ((g - 1) * size(costValues,2)):g * size(costValues,2));
+                        for c = 1 : size(costValues,2)
+                            errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Pred',num2str(((g - 1) * size(costValues,2)) + c));
+                            errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Real',num2str(((g - 1) * size(costValues,2)) + c));
+                            tempPred = outerTempStruct.(errorResultsNamePred);
+                            outerTempStruct = rmfield(outerTempStruct,errorResultsNamePred);
+                            errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Gamma',num2str(g),'Cost',num2str(c),'Pred');
+                            outerTempStruct.(errorResultsNamePred) = tempPred;
+                            tempReal = outerTempStruct.(errorResultsNameReal);
+                            outerTempStruct = rmfield(outerTempStruct,errorResultsNameReal);
+                            errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Gamma',num2str(g),'Cost',num2str(c),'Real');
+                            outerTempStruct.(errorResultsNameReal) = tempReal;
+                        end
                     end
+                    errorStruct = catstruct(errorStruct, outerTempStruct);
                 end
                 results = mean(results,3);
                 [temp,index] = min(results(:));
@@ -491,9 +535,17 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
 
             gamma(outerFolds) = optG;
             cost(outerFolds) = optC;
-            settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(optG,'%f'),{' -c'},{' '},num2str(optC,'%f')); 
-            mdl = svmtrain(trainingSet(:,end),trainingSet(:,1:end-1),settings{1}); 
-            preds = svmpredict(testingSet(:,end),testingSet(:,1:end-1),mdl);
+            if libToUse == 1
+                settings = strcat('-q -s 3 -t',{' '},num2str(kernel),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(optG,'%f'),{' -c'},{' '},num2str(optC,'%f')); 
+                mdl = svmtrain(trainingSet(:,end),trainingSet(:,1:end-1),settings{1});
+                preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
+            else
+                settings = strcat('-q -s',{' '},num2str(kernel),{' -c'},{' '},num2str(optC,'%f'));
+                mySparseTrain = sparse(trainingSet(:,1:end-1));
+                mdl = train(trainingSet(:,end),mySparseTrain,settings{1});
+                mySparseTest = sparse(testingSet(:,1:end-1));
+                preds = predict(testingSet(:,end),mySparseTest,mdl);
+            end
             preds(preds < 0) = 0;
             preds(preds > 100) = 100;
             mdlName = strcat('mdl',num2str(outerFolds));
@@ -563,23 +615,46 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
                     [p,q] = meshgrid(gammaValues, costValues);
                     pairs = [p(:) q(:)];
                     tempResults = zeros(size(pairs,1),1);
+                    outerTempStruct = struct;
                     parfor p = 1 : size(pairs,1)
-                        settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(pairs(p,1),'%f'),{' -c'},{' '},num2str(pairs(p,2),'%f'));
-                        mdl = svmtrain(innerTraining(:,end),innerTraining(:,1:end-1),settings{1});
-                        preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
+                        if libToUse == 1
+                            settings = strcat('-q -s 3 -t',{' '},num2str(kernel),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(pairs(p,1),'%f'),{' -c'},{' '},num2str(pairs(p,2),'%f'));
+                            mdl = svmtrain(innerTraining(:,end),innerTraining(:,1:end-1),settings{1});
+                            preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
+                        else
+                            settings = strcat('-q -s',{' '},num2str(kernel),{' -c'},{' '},num2str(pairs(p,2),'%f'));
+                            mySparseTrain = sparse(innerTraining(:,1:end-1));
+                            mdl = train(innerTraining(:,end),mySparseTrain,settings{1});
+                            mySparseTest = sparse(innerTesting(:,1:end-1));
+                            preds = predict(innerTesting(:,end),mySparseTest,mdl);
+                        end
+                        
                         preds(preds < 0) = 0;
                         preds(preds > 100) = 100;
-                        errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Pred');
-                        errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Real');
-                        tempStruct = struct;
-                        tempStruct.(errorResultsNamePred) = preds;
-                        tempStruct.(errorResultsNameReal) = innerTesting(:,end);
-                        errorStruct = catstruct(errorStruct,tempStruct);
+                        errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Pred',num2str(p));
+                        errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Real',num2str(p));
+                        innerTempStruct = struct;
+                        innerTempStruct.(errorResultsNamePred) = preds;
+                        innerTempStruct.(errorResultsNameReal) = innerTesting(:,end);
+                        outerTempStruct = catstruct(outerTempStruct,innerTempStruct);
                         tempResults(p) = sum(abs(preds - innerTesting(:,end)));
                     end
                     for g = 1 : size(gammaValues,2)
                         results(g,1:size(costValues,2),innerFolds) = tempResults(1 + ((g - 1) * size(costValues,2)):g * size(costValues,2));
+                        for c = 1 : size(costValues,2)
+                            errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Pred',num2str(((g - 1) * size(costValues,2)) + c));
+                            errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Real',num2str(((g - 1) * size(costValues,2)) + c));
+                            tempPred = outerTempStruct.(errorResultsNamePred);
+                            outerTempStruct = rmfield(outerTempStruct,errorResultsNamePred);
+                            errorResultsNamePred = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Gamma',num2str(g),'Cost',num2str(c),'Pred');
+                            outerTempStruct.(errorResultsNamePred) = tempPred;
+                            tempReal = outerTempStruct.(errorResultsNameReal);
+                            outerTempStruct = rmfield(outerTempStruct,errorResultsNameReal);
+                            errorResultsNameReal = strcat('outer',num2str(outerFolds),'Inner',num2str(innerFolds),'Depth',num2str(iterationCount),'Gamma',num2str(g),'Cost',num2str(c),'Real');
+                            outerTempStruct.(errorResultsNameReal) = tempReal;
+                        end
                     end
+                    errorStruct = catstruct(errorStruct, outerTempStruct);
                 end
                 results = mean(results,3);
                 [temp,index] = min(results(:));
@@ -665,9 +740,17 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
 
             gamma(outerFolds) = optG;
             cost(outerFolds) = optC;
-            settings = strcat('-q -s 3 -t',{' '},num2str(kernal),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(optG,'%f'),{' -c'},{' '},num2str(optC,'%f')); 
-            mdl = svmtrain(trainingSet(:,end),trainingSet(:,1:end-1),settings{1}); 
-            preds = svmpredict(testingSet(:,end),testingSet(:,1:end-1),mdl);
+            if libToUse == 1
+                settings = strcat('-q -s 3 -t',{' '},num2str(kernel),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(optG,'%f'),{' -c'},{' '},num2str(optC,'%f')); 
+                mdl = svmtrain(trainingSet(:,end),trainingSet(:,1:end-1),settings{1});
+                preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
+            else
+                settings = strcat('-q -s',{' '},num2str(kernel),{' -c'},{' '},num2str(optC,'%f'));
+                mySparseTrain = sparse(trainingSet(:,1:end-1));
+                mdl = train(trainingSet(:,end),mySparseTrain,settings{1});
+                mySparseTest = sparse(testingSet(:,1:end-1));
+                preds = predict(testingSet(:,end),mySparseTest,mdl);
+            end
             preds(preds < 0) = 0;
             preds(preds > 100) = 100;
             mdlName = strcat('mdl',num2str(outerFolds));
@@ -719,11 +802,12 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
     SVMSettings.dataTable = dataTable;
     SVMSettings.targetData = targetData;
     SVMSettings.degree = degree;
-    SVMSettings.kernal = kernal;
+    SVMSettings.kernal = kernel;
     SVMSettings.groupVars = groupVars;
     SVMSettings.startGammaValues = startGammaValues;
     SVMSettings.startCostValues = startCostValues;
     SVMSettings.crossValFolds = crossValFolds;
+    
     if exist('badPredTable','var')
         SVMSettings.badPredNames = badPredTable.Properties.VariableNames;
     else
