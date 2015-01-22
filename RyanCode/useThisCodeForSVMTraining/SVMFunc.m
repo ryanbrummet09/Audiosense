@@ -66,6 +66,7 @@
 %                               fields of the mdlStruct struct returned
 %           int: degree - degree used for SVM
 %           int: kernal - SVM kernal using libSVM syntax
+%           int: libToUse - lib used. 1 is libSVM. 2 is libLinear.
 %           cell array: groupVars - gives predictors used to stratify folds
 %           array: startGammaValues - gives initial grid search range for
 %                                     gamma
@@ -538,7 +539,7 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
             if libToUse == 1
                 settings = strcat('-q -s 3 -t',{' '},num2str(kernel),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(optG,'%f'),{' -c'},{' '},num2str(optC,'%f')); 
                 mdl = svmtrain(trainingSet(:,end),trainingSet(:,1:end-1),settings{1});
-                preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
+                preds = svmpredict(testingSet(:,end),testingSet(:,1:end-1),mdl);
             else
                 settings = strcat('-q -s',{' '},num2str(kernel),{' -c'},{' '},num2str(optC,'%f'));
                 mySparseTrain = sparse(trainingSet(:,1:end-1));
@@ -743,7 +744,7 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
             if libToUse == 1
                 settings = strcat('-q -s 3 -t',{' '},num2str(kernel),{' -d'},{' '},num2str(degree),{' -g'},{' '},num2str(optG,'%f'),{' -c'},{' '},num2str(optC,'%f')); 
                 mdl = svmtrain(trainingSet(:,end),trainingSet(:,1:end-1),settings{1});
-                preds = svmpredict(innerTesting(:,end),innerTesting(:,1:end-1),mdl);
+                preds = svmpredict(testingSet(:,end),testingSet(:,1:end-1),mdl);
             else
                 settings = strcat('-q -s',{' '},num2str(kernel),{' -c'},{' '},num2str(optC,'%f'));
                 mySparseTrain = sparse(trainingSet(:,1:end-1));
@@ -803,6 +804,7 @@ function [ SVMSettings, mdlStruct, errorStruct ] = SVMFunc( inputStruct )
     SVMSettings.targetData = targetData;
     SVMSettings.degree = degree;
     SVMSettings.kernal = kernel;
+    SVMSettings.libToUse = libToUse;
     SVMSettings.groupVars = groupVars;
     SVMSettings.startGammaValues = startGammaValues;
     SVMSettings.startCostValues = startCostValues;
