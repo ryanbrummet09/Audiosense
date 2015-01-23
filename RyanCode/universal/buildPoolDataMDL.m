@@ -24,7 +24,8 @@
 %                                    path.  Add by column NOT row.
 %           string: saveLocation - location to save results; if not present
 %                                  results are only returned, not saved.
-%                                  Include the full name you wish to use.
+%                                  Include the full name you wish to use
+%                                  but do not include extension.
 %           string: dataLocation - location of dataset (must be table named
 %                                  dataTable saved at this .mat location)
 %           cell array: response - name of the response being predicted.
@@ -278,7 +279,7 @@ function [ SVMSettings, mdlStruct, errorStruct ] = buildPoolDataMDL( inputStruct
     end
     
     % get information used to find optimal place for parallelization
-    innerParFor = ((ceil(size(startGammaValues,2) / numCores) * size(startCostValues,2)) + (ceil(5 / numCores) * 5 * (maxIterCount - 1))) * (crossValFolds * crossValFolds);
+    innerParFor = ((size(startGammaValues,2) * ceil(size(startCostValues,2) / numCores)) + (ceil(5 / numCores) * 5 * (maxIterCount - 1))) * (crossValFolds * crossValFolds);
     outerParFor = ((size(startGammaValues,2) * size(startCostValues,2)) + (5 * 5 * (maxIterCount - 1))) * (ceil(crossValFolds / numCores) * crossValFolds);
     
     disp(strcat('Optimal SVM grid params will now be found for:',{' '},response));
