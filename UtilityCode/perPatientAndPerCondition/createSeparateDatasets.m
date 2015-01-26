@@ -1,28 +1,39 @@
-function  [pids] = createSeparateDatasets( ipStruct, toSaveAt, frameSize )
+function  [ids] = createSeparateDatasets( ipStruct, toSaveAt,frameSize,...
+                                            patientOrCondition)
 %CREATESEPARATEDATASETS Create files in the format that Ryan's patch knows
 %   Input:
 %           ipStruct        :       Structure containing the tables
 %           toSaveAt        :       folder to save the individual tables at
 %           frameSize       :       string containing the frame size
+%           patientOrCondition :    true if patient, false if condition
 % 
 %   Output:
-%           pids            :       patient ids for patients which have
-%                                   are present
+%           ids             :       patient or condition ids that are
+%                                   present in in the struct
 
 fn = fieldnames(ipStruct);
 if 7 ~= exist(toSaveAt)
     mkdir(toSaveAt);
 end
-pids =  {};
+ids =  {};
 for P=1:length(fn)
-    pid = strsplit(fn{P}, '_');
-    pid = pid{end};
-    pids{end+1} = pid;
-    filen = sprintf('surveyDataset_patient%s_%sms', pid, frameSize);
+    id = strsplit(fn{P}, '_');
+    id = id{end};
+    ids{end+1} = id;
+    if patientOrCondition
+        filen = sprintf('surveyDataset_patient%s_%sms', id, frameSize);
+    else
+        filen = sprintf('surveyDataset_condition%s_%sms', id, frameSize);
+    end
     toEval = sprintf('%s = ipStruct.(fn{P});', filen);
     eval(toEval);
-    saveLocation = sprintf('%s/surveyDataset_patient%s_%sms.mat', ...
-                    toSaveAt, pid, frameSize);
+    if patientOrCondition
+        saveLocation = sprintf('%s/surveyDataset_patient%s_%sms.mat', ...
+                    toSaveAt, id, frameSize);
+    else
+        saveLocation = sprintf('%s/surveyDataset_condition%s_%sms.mat', ...
+                    toSaveAt, id, frameSize);
+    end
     save(saveLocation, filen);
 end
 
