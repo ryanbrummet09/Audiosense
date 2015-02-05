@@ -341,7 +341,14 @@ function [ SVMSettings, mdlStruct, errorStruct, insufficientSamples ] = buildPoo
         if exist('toRemoveModel','var')
             temp(:,toRemoveModel) = [];
         end
-        dummyData = dummyEncode( temp(:,catPreds), catPreds, zeroPreds );
+        if isempty(catPreds)
+            dummyData = [];
+        else
+            dummyData = dummyEncode(temp(:,catPreds), catPreds, zeroPreds);
+        end
+        
+    else
+        dummyData = [];
     end
     
     temp = dataTable;
@@ -363,16 +370,17 @@ function [ SVMSettings, mdlStruct, errorStruct, insufficientSamples ] = buildPoo
     rng(seed);
     try
         [ outerCV ] = stratifyByPreds( dataTable, groupVars, crossValFolds );
-    catch
+    catch err
+        disp(err);
         SVMSettings = NaN;
         mdlStruct = NaN;
         errorStruct = NaN;
         insufficientSamples = true;
         if saveResults
-            disp('Insufficient Samples detected. No results were saved beyond a dummy file indicating this fact');
             save(saveLocation,'insufficientSamples','-v7.3');
+            error('Insufficient Samples detected. No results were saved beyond a dummy file indicating this fact');
         else
-            disp('Insufficient Samples detected.');
+            error('Insufficient Samples detected.');
         end
         return;
     end
@@ -554,7 +562,8 @@ function [ SVMSettings, mdlStruct, errorStruct, insufficientSamples ] = buildPoo
                 temp.(realName) = testingSet(:,end);
                 errorStruct = catstruct(errorStruct,temp);
                 disp(strcat('Outer Fold',{' '},num2str(outerFolds),{' '},'Completed'));
-            catch
+            catch err
+                disp(err);
                 tempInsufficientSamples(outerFolds) = true; 
             end
         end
@@ -564,10 +573,10 @@ function [ SVMSettings, mdlStruct, errorStruct, insufficientSamples ] = buildPoo
             errorStruct = NaN;
             insufficientSamples = true;
             if saveResults
-                disp('Insufficient Samples detected. No results were saved beyond a dummy file indicating this fact');
                 save(saveLocation,'insufficientSamples','-v7.3');
+                error('Insufficient Samples detected. No results were saved beyond a dummy file indicating this fact');
             else
-                disp('Insufficient Samples detected.');
+                error('Insufficient Samples detected.');
             end
             return;
         end
@@ -582,16 +591,17 @@ function [ SVMSettings, mdlStruct, errorStruct, insufficientSamples ] = buildPoo
             temp = dataTable(training(outerCV,outerFolds),:);
             try
                 [ innerCV ] = stratifyByPreds( temp, groupVars, crossValFolds );
-            catch
+            catch err
+                disp(err);
                 SVMSettings = NaN;
                 mdlStruct = NaN;
                 errorStruct = NaN;
                 insufficientSamples = true;
                 if saveResults
-                    disp('Insufficient Samples detected. No results were saved beyond a dummy file indicating this fact');
                     save(saveLocation,'insufficientSamples','-v7.3');
+                    error('Insufficient Samples detected. No results were saved beyond a dummy file indicating this fact');
                 else
-                    disp('Insufficient Samples detected.');
+                    error('Insufficient Samples detected.');
                 end
                 return;
             end
@@ -608,16 +618,17 @@ function [ SVMSettings, mdlStruct, errorStruct, insufficientSamples ] = buildPoo
                     try
                         innerTraining = trainingSet(training(innerCV,innerFolds),:);
                         innerTesting = trainingSet(test(innerCV,innerFolds),:);
-                    catch
+                    catch err
+                        disp(err);
                         SVMSettings = NaN;
                         mdlStruct = NaN;
                         errorStruct = NaN;
                         insufficientSamples = true;
                         if saveResults
-                            disp('Insufficient Samples detected. No results were saved beyond a dummy file indicating this fact');
                             save(saveLocation,'insufficientSamples','-v7.3');
+                            error('Insufficient Samples detected. No results were saved beyond a dummy file indicating this fact');
                         else
-                            disp('Insufficient Samples detected.');
+                            error('Insufficient Samples detected.');
                         end
                         return;
                     end
