@@ -1,4 +1,5 @@
-function [ snrV ] = runMe( filename, fs, frameSizeInSeconds )
+function [ snrV, smoothedPower, noiseFloor ] = runMe( filename, fs, ...
+                                    frameSizeInSeconds )
 %RUNME Calculate the SNR
 %   Input:
 %           filename        :       full path of file under consideration
@@ -7,14 +8,16 @@ function [ snrV ] = runMe( filename, fs, frameSizeInSeconds )
 % 
 %   Output:
 %           snrV            :       instanteneous SNR
+%           smoothedPower   :       estimated power in composite signal
+%           noiseFloor      :       estimated power in noise floor
 
 f = fopen(filename, 'r');
 data = fread(f, Inf, 'short', 0, 'l');
 fclose(f);
 
 scaledSignal = scaleSignal(data);
-[~, scaledPower] = powerCalc(scaledSignal);
-[snrV, ~] = instantSNR(scaledPower, fs, frameSizeInSeconds);
+[~, smoothedPower] = powerCalc(scaledSignal);
+[snrV, noiseFloor] = instantSNR(smoothedPower, fs, frameSizeInSeconds);
 
 end
 

@@ -4,7 +4,7 @@ function [ scaledSignal ] = scaleSignal( signalData, a, b, sigMin, sigMax )
 %   values of the signal
 
 if 1 == nargin
-    a = -1;
+    a = 0;
     b = 1;
     sigMin = -32768;
     sigMax = 32767;

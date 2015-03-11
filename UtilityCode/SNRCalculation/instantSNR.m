@@ -16,6 +16,7 @@ if 1 == nargin
 elseif 2 == nargin
     frameSizeInSeconds = 0.064;
 end
+oFactor = 1;
 P_miniFrame_min = inf;
 P_noise = zeros(size(smoothedPower));
 snrV = P_noise;
@@ -28,8 +29,9 @@ for P=1:length(smoothedPower)
             P_miniFrame_min = min(smoothedPower(P:P+samplesInFrame-1));
         end
     end
-    P_noise(P) = min([smoothedPower(P), P_miniFrame_min]);
-    snrV(P) = 10*log10((smoothedPower(P) - P_noise(P))/P_noise(P));
+    P_noise(P) = P_miniFrame_min;
+    snrV(P) = 10*log10((smoothedPower(P) - oFactor*P_noise(P))/...
+                        (oFactor*P_noise(P)));
 end
 end
 
