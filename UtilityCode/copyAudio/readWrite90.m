@@ -13,10 +13,25 @@ finalFileList = cell(size(fileList));
 parObj = parpool;
 parfor P=1:length(fileList)
     fileToConsider = fileList{P};
-    data = readData(fileToConsider, 16000, 90);
     mainFilename = strsplit(fileToConsider, '/');
+    try
+        data = readData(fileToConsider, 16000, 90);
+    catch errReading
+        errReading
+        disp(sprintf('There was an error reading the file %s, skipping',...
+            mainFilename));
+        continue;
+    end
+    disp(sprintf('Working with %s', mainFilename));
     toWriteAt = strcat(finalFolder, '/', mainFilename{end});
-    writeData(data, toWriteAt);
+    try
+        writeData(data, toWriteAt);
+    catch errWriting
+        errWriting
+        disp(sprintf('There was an error writing the file %s, skipping',...
+            mainFilename));
+        continue;
+    end
     finalFileList{P} = toWriteAt;
 end
 delete(parObj);
