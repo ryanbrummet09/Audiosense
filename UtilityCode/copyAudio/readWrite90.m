@@ -19,17 +19,17 @@ parfor P=1:length(fileList)
     catch errReading
         errReading
         disp(sprintf('There was an error reading the file %s, skipping',...
-            mainFilename));
+            mainFilename{end}));
         continue;
     end
-    disp(sprintf('Working with %s', mainFilename));
+    disp(sprintf('Working with %s', mainFilename{end}));
     toWriteAt = strcat(finalFolder, '/', mainFilename{end});
     try
         writeData(data, toWriteAt);
     catch errWriting
         errWriting
         disp(sprintf('There was an error writing the file %s, skipping',...
-            mainFilename));
+            mainFilename{end}));
         continue;
     end
     finalFileList{P} = toWriteAt;
